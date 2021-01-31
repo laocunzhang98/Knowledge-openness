@@ -126,6 +126,59 @@ class LoginValidator extends LinValidator{
     ]
   }
 }
+class LabelValidator extends LinValidator{
+  constructor(){
+    super()
+    this.label_name = [
+      new Rule('isLength','标签长度不能大于10',{
+        max:10
+      })
+    ]
+  }
+}
+class ArticleInfoValidator extends LinValidator{
+  constructor(){
+    super()
+    this.title = [
+      new Rule("isLength","标题不能为空",{min:1,max:30})
+    ]
+    this.content = [
+      new Rule("isLength","内容不能为空",{min:1})
+    ]
+  }
+}
+
+class ArticleValidator extends LinValidator{
+  constructor(){
+    super()
+    this.id = [
+      new Rule("isUUID","该资源已消失")
+    ]
+  }
+}
+class FollowValidator extends LinValidator{
+  constructor(){
+    super()
+    this.fid = [
+      new Rule('isInt','需要是正整数',{min:1})
+    ],
+    this.uid = [
+      new Rule('isInt','需要是正整数',{min:1})
+    ]
+  }
+  async validateUser(vals){
+    const id = vals.body.fid
+    console.log(id)
+    const user = await User.findOne({
+      where:{
+        id:id
+      }
+    })
+    if(!user){
+      throw new Error('关注的该用户不存在')
+    }
+  }
+}
 // class LikeValidator extends PositiveIntegerValidator{
 //   constructor(){
 //     super()
@@ -139,5 +192,9 @@ module.exports = {
   TokenValidator,
   NotEmptyValidator,
   LoginValidator,
-  EmailValidator
+  EmailValidator,
+  LabelValidator,
+  ArticleValidator,
+  ArticleInfoValidator,
+  FollowValidator
 }

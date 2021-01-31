@@ -1,5 +1,5 @@
 const  {db} = require("../../core/db")
-const {Model,Sequelize} = require('sequelize')
+const {Model,Sequelize,DataTypes} = require('sequelize')
 const {User} = require('./user')
 
 class Article extends Model{
@@ -7,27 +7,37 @@ class Article extends Model{
 }
 Article.init({
   id:{
-    type:Sequelize.INTEGER,
+    type: DataTypes.UUID,
     primaryKey:true,
-    autoIncrement:true
+    defaultValue: DataTypes.UUIDV4,
+    unique: true,
   },
   title:{
     type:Sequelize.STRING
   },
   label:{
-    type:Sequelize.STRING
+    type:Sequelize.STRING(20)
   },
   content:{
-    type:Sequelize.STRING
+    type:DataTypes.TEXT
   },
   image:{
     type:Sequelize.STRING
   },
+  classify_name:{
+    type:Sequelize.STRING(20)
+  },
   fav_nums:{
-    type:Sequelize.INTEGER
+    type:Sequelize.INTEGER,
+    defaultValue:0
+  },
+  read_nums:{
+    type:Sequelize.INTEGER,
+    defaultValue:0
   },
   com_nums:{
-    type:Sequelize.INTEGER
+    type:Sequelize.INTEGER,
+    defaultValue:0
   },
   uid:{
     type:Sequelize.INTEGER

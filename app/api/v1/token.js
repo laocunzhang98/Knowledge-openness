@@ -14,12 +14,7 @@ router.post('/', async (ctx)=>{
   const v = await new TokenValidator().validate(ctx)
   switch(v.get('body.type')){
     case LoginType.USER_EMAIL:
-      try {
-        token = await emailLogin(v.get('body.account'),v.get('body.secret'))
-      } catch (error) {
-        message = error.msg
-        code = error.code
-      }
+      token = await emailLogin(v.get('body.account'),v.get('body.secret'))
       break;
     case LoginType.USER_MINI_PROGRAM:
       token = await WXManager.codeToToken(v.get('body.account'))
@@ -31,9 +26,9 @@ router.post('/', async (ctx)=>{
       token = await superManagerLogin(v.get('body.account'),v.get('body.secret'))
       break
     default:
-    throw new global.errs.ParameterException('没有相应处理函数')
+      throw new global.errs.ParameterException('没有相应处理函数')
   }
-  success()
+  success(token)
 })
 
 router.post("/admin",async (ctx)=>{
@@ -50,7 +45,6 @@ router.post('/verify',async (ctx)=>{
 
 async function emailLogin(account,secret){
   const verified = await User.verifyEmailPassword(account,secret)
-  
   return generateToken(verified.id, Auth.USER)
 }
 

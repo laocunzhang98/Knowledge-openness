@@ -32,11 +32,9 @@ class Favor extends Model{
   }
 }
 
-
-
 Favor.init({
   uid:Sequelize.INTEGER,
-  article_id:Sequelize.INTEGER,
+  article_id:Sequelize.STRING,
 },{
   sequelize:db,
   tableName:"favor"

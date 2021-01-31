@@ -48,21 +48,21 @@ router.post('/sendmail', async (ctx)=>{
     html: `<h3>您的注册验证码是"${code = conf.code()}"</h3>
     ` // 邮件内容
   }
-  
+  console.log("code is :",code)
   let transporter = nodeMailer.createTransport(transportOptions)
   // send mail
   let info
   
   try {
     info = await transporter.sendMail(sendMailOptions)
-    Store.hmset(`${sendMailOptions.to}`,'code',code)
+    Store.hmset(`${sendMailOptions.to}`,'code',code.toLocaleLowerCase())
     Store.hmset(`${sendMailOptions.to}`,'expire',conf.expire)
     Store.hmset(`${sendMailOptions.to}`,'email',sendMailOptions.to)
   } catch (error) {
     throw new global.errs.EmailError()
   }
   if (info) {
-    success('邮件发送成功')
+    success('SUCCESS','邮件发送成功')
   }
 })
 
@@ -76,13 +76,13 @@ router.post('/register', async (ctx) => {
     email: v.get('body.email'),
     password: v.get('body.password2'),
     nickname: v.get('body.nickname'),
-    avatar:`${global.config.Avatar}`
+    avatar:`${global.config.Avatar}`,
   }
-  if(email !== user.email || savecode !== v.get("body.code")){
+  if(email !== user.email || savecode !== v.get("body.code").toLocaleLowerCase()){
     throw new global.errs.CheckCodeError()
   }
   const r = await User.create(user)
-  success()
+  success('注册成功',"注册成功")
 })
 
 router.post('/supermanager', async (ctx)=>{
@@ -109,6 +109,6 @@ router.get("/userinfo", new Auth().m, async (ctx) =>{
       "email"
     ]
   })
-  success(user.dataValues)
+  success(user)
 })
 module.exports = router

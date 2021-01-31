@@ -83,6 +83,14 @@ class EmailError extends HttpException{
     this.errorCode = errorCode || 50000
   }
 }
+class FollowError extends HttpException{
+  constructor(msg,errorCode){
+    super()
+    this.code = 400
+    this.msg = msg || "你已经关注过此用户"
+    this.errorCode = errorCode || 50000
+  }
+}
 module.exports = {
   HttpException,
   ParameterException,
@@ -93,5 +101,6 @@ module.exports = {
   LikeError,
   DislikeError,
   CheckCodeError,
-  EmailError
+  EmailError,
+  FollowError
 }

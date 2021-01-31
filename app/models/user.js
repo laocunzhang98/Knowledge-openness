@@ -27,10 +27,10 @@ class User extends Model {
     })
     return user
   }
-  static async verifySuperManager(id){
+  static async verifySuperManager(email){
     const level =  await User.findOne({
       where:{
-        id:id
+        emial:email
       },
       attributes:["level"]
     })
@@ -71,7 +71,16 @@ User.init({
     type:Sequelize.STRING
   },
   level:{
-    type:Sequelize.INTEGER
+    type:Sequelize.INTEGER,
+    defaultValue:8
+  },
+  fans_nums:{
+    type:Sequelize.INTEGER,
+    defaultValue:0
+  },
+  follow_nums:{
+    type:Sequelize.INTEGER,
+    defaultValue:0
   }
 },{
   sequelize:db,

@@ -22,7 +22,7 @@ router.post('/addpic',new Auth().m,upload.single('file'), async (ctx,next)=>{
   let url = global.config.Basepath+`/article/${temp.year}${temp.month}${temp.day}/${ctx.req.file.filename}`
   console.log(ctx.req.file)
   
-  success(url,"新增图片成功")
+  success(url,"添加图片成功")
 })
 
 
