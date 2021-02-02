@@ -1,7 +1,6 @@
 const  {db} = require("../../core/db")
 const {Model,Sequelize,DataTypes} = require('sequelize')
 const {User} = require('./user')
-
 class Article extends Model{
 
 }
@@ -19,6 +18,9 @@ Article.init({
     type:Sequelize.STRING(20)
   },
   content:{
+    type:DataTypes.TEXT
+  },
+  rcontent:{
     type:DataTypes.TEXT
   },
   image:{

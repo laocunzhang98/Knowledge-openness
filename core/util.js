@@ -51,10 +51,17 @@ const generateToken = function(uid, scope){
     return token
 }
 
-
+const RandNum = function(){
+    let rand = ""
+    for(var i =0;i<8;i++){
+        rand += Math.floor(Math.random()*10)
+    }
+    return parseInt(rand)
+}
 
 module.exports = {
     findMembers,
     generateToken,
+    RandNum
 }
 

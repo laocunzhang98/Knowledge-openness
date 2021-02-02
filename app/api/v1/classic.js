@@ -33,6 +33,7 @@ router.post('/pub',new Auth().m,upload.single('file'), async (ctx,next)=>{
     title:ctx.request.body.title,
     label:ctx.request.body.label,
     content:ctx.request.body.content,
+    rcontent:ctx.request.body.rcontent,
     image:ctx.request.body.image,
     classify_name:ctx.request.body.classify,
     uid:ctx.auth.uid
@@ -87,7 +88,6 @@ router.get('/latest', new Auth().m, async (ctx,next)=>{
     console.log(article.id)
   })
   for(let i =0;i<r.length;i++){
-    console.log(r[i])
     const user = await User.findOne({
       where:{
         id:r[i].dataValues.uid
