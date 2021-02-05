@@ -99,9 +99,10 @@ router.post('/supermanager', async (ctx)=>{
 })
 
 router.get("/userinfo", new Auth().m, async (ctx) =>{
+  let id = ctx.query.id || ctx.auth.uid
   const user = await User.findOne({
     where:{
-      id:ctx.auth.uid
+      id:id
     },
     attributes:[
       "nickname",

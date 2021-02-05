@@ -1,11 +1,13 @@
 const Router = require("koa-router")
 const {Auth} = require('../../../middlewares/auth')
+const {Op} = require("sequelize")
 const { success } = require("../../lib/helper")
 const {Article} = require("../../models/article")
 const upload = require('../../routes/upload')
 const { User } = require("../../models/user")
-const {ArticleValidator,ArticleInfoValidator} = require("../../lib/validators/validator")
+const {ArticleValidator,ArticleInfoValidator,UpdateArticle} = require("../../lib/validators/validator")
 const db = require("../../../core/db")
+
 
 const router = new Router({
   prefix:'/v1/classic',
@@ -19,6 +21,30 @@ const temp = {
   day:day<10?"0"+day:day
 }
 // upload.single('file'),
+router.post("/update",new Auth().m,upload.single('file'), async (ctx,next)=>{
+  // const v = await new UpdateArticle().validate(ctx)
+  let url
+  try {
+    url = global.config.Basepath+`/article/${temp.year}${temp.month}${temp.day}/${ctx.req.file.filename}`
+  } catch (error) {
+    url = ""
+  }
+  await Article.update({
+    title:ctx.request.body.title,
+    label:ctx.request.body.label,
+    content:ctx.request.body.content,
+    rcontent:ctx.request.body.rcontent,
+    image:ctx.request.body.image,
+    classify_name:ctx.request.body.classify,
+    uid:ctx.auth.uid
+  },
+    {
+    where:{
+      id:ctx.request.body.article_id
+    }
+  })
+  success("修改成功","修改文章成功,快去看看吧！")
+})
 router.post('/pub',new Auth().m,upload.single('file'), async (ctx,next)=>{
   // let name = ctx.req.file.originalname
   const v = await new ArticleInfoValidator().validate(ctx)
@@ -43,7 +69,7 @@ router.post('/pub',new Auth().m,upload.single('file'), async (ctx,next)=>{
 
 router.get('/article/follow/:id',new Auth().m, async (ctx,next)=>{
   const v = await new ArticleValidator().validate(ctx)
-  console.log(v.get("path.id"))
+  // console.log(v.get("path.id"))
   const article_id = ctx.params.id 
   const article = await Article.findOne({
     where:{
@@ -81,25 +107,38 @@ router.get('/article/:id', new Auth().m,async (ctx,next)=>{
 })
 
 router.get('/latest', new Auth().m, async (ctx,next)=>{
-  const r = await Article.findAll({
+  let pageSize =parseInt(ctx.query.pageSize)|| 10
+  let id = ctx.query.article_id || ""
+  let page = ctx.query.page || 0
+  const r = await Article.findAndCountAll({
+    order:[
+        ["createdAt","desc"]
+    ],
+    where:{
+      id:{
+        [Op.ne]:id
+      }
+    },
+    offset:pageSize*page,
+    limit:pageSize
   })
+  
   const result = []
-  r.forEach((article)=>{
-    console.log(article.id)
-  })
-  for(let i =0;i<r.length;i++){
+  console.log(r.count)
+  for(let i =0;i<r.rows.length;i++){
     const user = await User.findOne({
       where:{
-        id:r[i].dataValues.uid
+        id:r.rows[i].uid
       }
     })
-    let data = r[i].dataValues
-    data.name = user.dataValues.nickname
+    let data = r.rows[i].dataValues
+    data.name = user.nickname
     result.push(data)
   }
-    
-  success(result)
   
+  success({data:result,
+    countSize:r.count
+  })
 })
 
 module.exports = router

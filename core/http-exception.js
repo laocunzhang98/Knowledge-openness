@@ -100,6 +100,14 @@ class FileError extends HttpException{
     this.errorCode = errorCode || 50000
   }
 }
+class FollowMineError extends HttpException{
+  constructor(msg,errorCode){
+    super()
+    this.code = 400
+    this.msg = msg || "关注错误",
+    this.errorCode = errorCode || 10000
+  }
+}
 
 module.exports = {
   HttpException,
@@ -113,5 +121,6 @@ module.exports = {
   CheckCodeError,
   EmailError,
   FollowError,
-  FileError
+  FileError,
+  FollowMineError
 }

@@ -10,8 +10,7 @@ const router = new Router({
 
 router.post("/",new Auth().m, async ctx=>{
   const v = await new FollowValidator().validate(ctx)
-  console.log(1111)
   await Follow.follow(ctx.auth.uid,v.get("body.fid"))
-  success()
+  success("关注成功","关注成功")
 })
 module.exports = router

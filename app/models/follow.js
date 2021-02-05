@@ -2,12 +2,13 @@ const  {db} = require("../../core/db")
 
 const {Model,Sequelize} = require('sequelize')
 const {User} = require("./user")
-
+const {FollowMineError} = require("../../core/http-exception")
 
 class Follow extends Model{
   static async follow(uid,fid){
-    console.log(111,uid)
-    console.log(222,fid)
+    if(uid==fid){
+      throw new FollowMineError()
+    }
     const follow = await Follow.findOne({
       where:{
         uid,

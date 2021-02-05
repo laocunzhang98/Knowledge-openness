@@ -1,5 +1,6 @@
 const { LinValidator,Rule } = require("../../../core/lin-validator")
 const {User} = require("../../models/user")
+const {Article} = require("../../models/article")
 
 const {LoginType} = require("../enum")
 
@@ -156,19 +157,46 @@ class ArticleValidator extends LinValidator{
     ]
   }
 }
+
+class CommentValidator extends LinValidator{
+  constructor(){
+    super()
+    this.article_id = [
+      new Rule("isUUID","该资源不存在")
+    ]
+    this.content = [
+      new Rule('isLength','不允许为空',{
+        min:1
+      })
+    ]
+  }
+  async validateAuthor(vals){
+    const article = await Article.findOne({
+      where:{
+        id:vals.body.article_id,
+        uid:vals.body.article_uid
+      }
+    })
+    if(!article){
+      throw new Error("参数错误")
+    }
+  }
+}
+class UpdateArticle extends CommentValidator{
+  constructor(){
+    super()
+  }
+}
 class FollowValidator extends LinValidator{
   constructor(){
     super()
     this.fid = [
       new Rule('isInt','需要是正整数',{min:1})
-    ],
-    this.uid = [
-      new Rule('isInt','需要是正整数',{min:1})
     ]
   }
+  
   async validateUser(vals){
     const id = vals.body.fid
-    console.log(id)
     const user = await User.findOne({
       where:{
         id:id
@@ -196,5 +224,7 @@ module.exports = {
   LabelValidator,
   ArticleValidator,
   ArticleInfoValidator,
-  FollowValidator
+  FollowValidator,
+  CommentValidator,
+  UpdateArticle
 }
