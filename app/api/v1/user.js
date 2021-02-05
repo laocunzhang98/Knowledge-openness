@@ -107,7 +107,8 @@ router.get("/userinfo", new Auth().m, async (ctx) =>{
     attributes:[
       "nickname",
       "avatar",
-      "email"
+      "email",
+      "id"
     ]
   })
   success(user)

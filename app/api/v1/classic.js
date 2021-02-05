@@ -84,7 +84,7 @@ router.get('/article/follow/:id',new Auth().m, async (ctx,next)=>{
     where:{
       id:article.dataValues.uid
     },
-    attributes:["avatar","nickname"]
+    attributes:["avatar","nickname","id"]
   })
   success(user.dataValues)
 })
@@ -110,6 +110,7 @@ router.get('/latest', new Auth().m, async (ctx,next)=>{
   let pageSize =parseInt(ctx.query.pageSize)|| 10
   let id = ctx.query.article_id || ""
   let page = ctx.query.page || 0
+  // console.log(page)
   const r = await Article.findAndCountAll({
     order:[
         ["createdAt","desc"]
@@ -124,7 +125,6 @@ router.get('/latest', new Auth().m, async (ctx,next)=>{
   })
   
   const result = []
-  console.log(r.count)
   for(let i =0;i<r.rows.length;i++){
     const user = await User.findOne({
       where:{

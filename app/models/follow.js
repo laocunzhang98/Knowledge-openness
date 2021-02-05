@@ -15,7 +15,6 @@ class Follow extends Model{
         fid
       }
     })
-    console.log(follow)
     if(follow){
       db.transaction(async t=>{
         await Follow.destroy({
@@ -65,6 +64,7 @@ class Follow extends Model{
           by:1,transaction:t
         })
       })
+      
     }
   }
 
