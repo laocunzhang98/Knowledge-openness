@@ -81,6 +81,12 @@ User.init({
   follow_nums:{
     type:Sequelize.INTEGER,
     defaultValue:0
+  },
+  job:{
+    type:Sequelize.STRING(20)
+  },
+  describe:{
+    type:Sequelize.STRING
   }
 },{
   sequelize:db,

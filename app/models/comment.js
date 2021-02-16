@@ -44,7 +44,7 @@ Comment.init({
     defaultValue:0
   },
   content:{
-    type:Sequelize.STRING
+    type:DataTypes.TEXT
   }
 },{
   sequelize:db

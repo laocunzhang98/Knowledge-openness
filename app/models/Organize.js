@@ -17,7 +17,7 @@ Organize.init({
   uid:{
     type:Sequelize.INTEGER
   },
-  circle_name:{
+  team_name:{
     type:Sequelize.STRING
   }
 },{

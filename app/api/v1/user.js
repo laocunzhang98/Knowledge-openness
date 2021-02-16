@@ -2,7 +2,7 @@ const Router = require("koa-router")
 const nodeMailer = require('nodemailer')
 const Redis = require('koa-redis')
 const { User } = require('../../models/user')
-const { RegisterValidator,EmailValidator } = require('../../lib/validators/validator')
+const { RegisterValidator, EmailValidator } = require('../../lib/validators/validator')
 const { success } = require('../../lib/helper')
 const { Auth } = require("../../../middlewares/auth")
 const router = new Router({
@@ -11,7 +11,7 @@ const router = new Router({
 
 const Store = new Redis().client
 
-router.post('/sendmail', async (ctx)=>{
+router.post('/sendmail', async (ctx) => {
   const v = await new EmailValidator().validate(ctx)
   // await Store.hget(`${v.get("body.email")}`)
   const conf = {
@@ -26,10 +26,10 @@ router.post('/sendmail', async (ctx)=>{
         return Math.random().toString(16).slice(2, 6).toUpperCase()
       }
     },
-    get expire(){
+    get expire() {
       return new Date().getTime()
     }
-    
+
   }
   const transportOptions = {
     host: 'smtp.qq.com',
@@ -38,8 +38,8 @@ router.post('/sendmail', async (ctx)=>{
       pass: conf.pass // smtp授权码
     }
   }
-  
-  let code 
+
+  let code
   // 邮件模版
   const sendMailOptions = {
     from: `"认证邮件"<${conf.user}>`, // 发件人
@@ -48,69 +48,105 @@ router.post('/sendmail', async (ctx)=>{
     html: `<h3>您的注册验证码是"${code = conf.code()}"</h3>
     ` // 邮件内容
   }
-  console.log("code is :",code)
+  console.log("code is :", code)
   let transporter = nodeMailer.createTransport(transportOptions)
   // send mail
   let info
-  
+
   try {
     info = await transporter.sendMail(sendMailOptions)
-    Store.hmset(`${sendMailOptions.to}`,'code',code.toLocaleLowerCase())
-    Store.hmset(`${sendMailOptions.to}`,'expire',conf.expire)
-    Store.hmset(`${sendMailOptions.to}`,'email',sendMailOptions.to)
+    Store.hmset(`${sendMailOptions.to}`, 'code', code.toLocaleLowerCase())
+    Store.hmset(`${sendMailOptions.to}`, 'expire', conf.expire)
+    Store.hmset(`${sendMailOptions.to}`, 'email', sendMailOptions.to)
   } catch (error) {
     throw new global.errs.EmailError()
   }
   if (info) {
-    success('SUCCESS','邮件发送成功')
+    success('SUCCESS', '邮件发送成功')
   }
 })
 
 router.post('/register', async (ctx) => {
   // 接收参数
   const v = await new RegisterValidator().validate(ctx)
-  const savecode = await Store.hget(`${v.get("body.email")}`,'code')
-  const expire = await Store.hget(`${v.get("body.email")}`,'expire')
-  const email = await Store.hget(`${v.get("body.email")}`,'email')
+  const savecode = await Store.hget(`${v.get("body.email")}`, 'code')
+  const expire = await Store.hget(`${v.get("body.email")}`, 'expire')
+  const email = await Store.hget(`${v.get("body.email")}`, 'email')
   const user = {
     email: v.get('body.email'),
     password: v.get('body.password2'),
     nickname: v.get('body.nickname'),
-    avatar:`${global.config.Avatar}`,
+    avatar: `${global.config.Avatar}`,
   }
-  if(email !== user.email || savecode !== v.get("body.code").toLocaleLowerCase()){
+  if (email !== user.email || savecode !== v.get("body.code").toLocaleLowerCase()) {
     throw new global.errs.CheckCodeError()
   }
   const r = await User.create(user)
-  success('注册成功',"注册成功")
+  success('注册成功', "注册成功")
 })
 
-router.post('/supermanager', async (ctx)=>{
+router.post('/supermanager', async (ctx) => {
   const v = await new RegisterValidator().validate(ctx)
   const user = {
     email: v.get('body.email'),
     password: v.get('body.password2'),
     nickname: v.get('body.nickname'),
-    level:32,
-    avatar:`${global.config.Avatar}`
+    level: 32,
+    avatar: `${global.config.Avatar}`
   }
   const r = await User.create(user)
   success()
 })
 
-router.get("/userinfo", new Auth().m, async (ctx) =>{
+router.get("/userinfo", new Auth().m, async (ctx) => {
   let id = ctx.query.id || ctx.auth.uid
   const user = await User.findOne({
-    where:{
-      id:id
+    where: {
+      id: id
     },
-    attributes:[
+    attributes: [
       "nickname",
       "avatar",
       "email",
-      "id"
+      "id",
+      "job",
+      "describe",
+      "fans_nums",
+      "follow_nums"
     ]
   })
   success(user)
 })
+
+
+router.put("/update", new Auth().m, async ctx => {
+  let data = {
+  }
+  let avatar = ctx.request.body.avatar || ''
+  let nickname = ctx.request.body.nickname || ''
+  let job = ctx.request.body.job || ''
+  let describe = ctx.request.body.describe || ''
+  if(avatar){
+    data.avatar = avatar
+  }
+  if(nickname){
+    data.nickname = nickname
+  }
+  if(job){
+    data.job = job
+  }
+  if(describe){
+    data.describe = describe
+  }
+  const user = await User.update(data,
+    {
+      where: {
+        id: ctx.auth.uid
+      }
+
+    })
+  success("success","审核中")
+})
+
+
 module.exports = router

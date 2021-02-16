@@ -12,7 +12,6 @@ const temp = {
 }
 const storage = multer.diskStorage({
   destination: function(req,file,cb){
-    console.log(req)
     let newpath  = path.join(process.cwd(),'public/uploads/files/'+temp.year + temp.month + temp.day)
     if(!fs.existsSync(newpath)){
       fs.mkdirSync(newpath)

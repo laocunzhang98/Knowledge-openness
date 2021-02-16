@@ -10,9 +10,11 @@ const router = new Router({
 
 router.post("/create",new Auth().m,async ctx=>{
   await Organize.create({
-    uid:ctx.auth.uid
+    team_name:ctx.request.body.team_name,
+    uid:ctx.auth.uid,
+    level:32
   })
-  success()
+  success("团队创建成功","团队创建成功")
   }
 )
 

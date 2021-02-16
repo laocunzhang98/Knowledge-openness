@@ -43,6 +43,9 @@ Article.init({
   },
   uid:{
     type:Sequelize.INTEGER
+  },
+  organize_id:{
+    type:Sequelize.INTEGER
   }
 },{
   sequelize:db,

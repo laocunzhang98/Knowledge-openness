@@ -27,7 +27,6 @@ router.post("/", new Auth().m, async ctx=>{
 
 router.get("/getcomment", new Auth().m, async ctx =>{
   const article_id = ctx.query.article_id
-  console.log(article_id)
   const comments = await Comment.findAll({
     where:{
       article_id,
@@ -56,6 +55,7 @@ router.get("/getcomment", new Auth().m, async ctx =>{
     }
     comment.dataValues.nickname = user.nickname
     comment.dataValues.avatar = user.avatar
+    comment.dataValues.job = user.job
     if(comment.comment_id ===0){
       data.first.push(comment)
     }

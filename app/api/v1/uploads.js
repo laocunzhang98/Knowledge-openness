@@ -17,27 +17,27 @@ const temp = {
   month:month<10?"0"+month:month,
   day:day<10?"0"+day:day
 }
-// upload.single('file'),
 router.post('/addpic',new Auth().m,upload.single('file'), async (ctx,next)=>{
   // let name = ctx.req.file.originalname
   let url = global.config.Basepath+`/article/${temp.year}${temp.month}${temp.day}/${ctx.req.file.filename}`
-  console.log(ctx.req.file)
+
   success(url,"添加图片成功")
 })
 
-
+router.post("/addfiles" ,new Auth().m,upload.any("file"),async ctx=>{
+  console.log(ctx.req.files)
+  success()
+})
 router.post("/addfile",new Auth().m,async ctx=>{
   let err = await file.single("file")(ctx)
     .then(res=>res)
     .catch(err=>err)
-  // console.log(err)
   if(!err.request){
     console.log(err)
     throw new global.errs.FileError()
   }
   else{
-    let url = global.config.Basepath+`/${ctx.auth.uid}/${temp.year}${temp.month}${temp.day}/${ctx.req.file.filename}`
-    console.log(ctx.req.file)
+    let url = global.config.Basepath+`/files/${temp.year}${temp.month}${temp.day}/${ctx.req.file.filename}`
     success(url,"文件上传成功")
   } 
   
