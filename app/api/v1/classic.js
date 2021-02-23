@@ -36,7 +36,8 @@ router.post("/update",new Auth().m,upload.single('file'), async (ctx,next)=>{
     rcontent:ctx.request.body.rcontent,
     image:ctx.request.body.image,
     classify_name:ctx.request.body.classify,
-    uid:ctx.auth.uid
+    public:ctx.request.body.public,
+    organize_id:ctx.request.body.organize_id
   },
     {
     where:{
@@ -45,6 +46,7 @@ router.post("/update",new Auth().m,upload.single('file'), async (ctx,next)=>{
   })
   success({article_id:ctx.request.body.article_id,title:ctx.request.body.title},"修改文章成功,快去看看吧！")
 })
+
 router.post('/pub',new Auth().m,upload.single('file'), async (ctx,next)=>{
   // let name = ctx.req.file.originalname
   const v = await new ArticleInfoValidator().validate(ctx)
@@ -61,7 +63,9 @@ router.post('/pub',new Auth().m,upload.single('file'), async (ctx,next)=>{
     rcontent:ctx.request.body.rcontent,
     image:ctx.request.body.image,
     classify_name:ctx.request.body.classify,
-    uid:ctx.auth.uid
+    uid:ctx.auth.uid,
+    public:ctx.request.body.public,
+    organize_id:ctx.request.body.organize_id
   })
   success({article_id:article.id,title:article.title},"发表成功,快去看看吧！")
 })
@@ -119,10 +123,10 @@ router.get('/latest', new Auth().m, async (ctx,next)=>{
   let id = ctx.query.article_id || ""
   let page = ctx.query.page || 0
   let word = ctx.query.word || ''
-  // console.log(page)
+  let public = ctx.query.public || 1
   const r = await Article.findAndCountAll({
     order:[
-        ["createdAt","desc"]
+      ["createdAt","desc"]
     ],
     where:{
       id:{
@@ -130,7 +134,8 @@ router.get('/latest', new Auth().m, async (ctx,next)=>{
       },
       title:{
         [Op.like]:`%${word}%`
-      }
+      },
+      public:public
     },
     offset:pageSize*page,
     limit:pageSize
@@ -181,6 +186,36 @@ router.get("/articleAll", new Auth().m, async ctx=>{
   })
   success(article)
 })
-
+router.get("/orglatest",new Auth().m,async ctx =>{
+  let pageSize =parseInt(ctx.query.pageSize)|| 10
+  let organize_id = parseInt(ctx.query.organize_id)
+  let page = ctx.query.page || 0
+  const r = await Article.findAndCountAll({
+    order:[
+      ["createdAt","desc"]
+    ],
+    where:{
+      organize_id:organize_id
+    },
+    offset:pageSize*page,
+    limit:pageSize
+  })
+  
+  const result = []
+  for(let i =0;i<r.rows.length;i++){
+    const user = await User.findOne({
+      where:{
+        id:r.rows[i].uid
+      }
+    })
+    let data = r.rows[i].dataValues
+    data.name = user.nickname
+    result.push(data)
+  }
+  
+  success({data:result,
+    countSize:r.count
+  })
+})
 module.exports = router
   

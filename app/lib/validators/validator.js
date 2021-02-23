@@ -1,7 +1,7 @@
 const { LinValidator,Rule } = require("../../../core/lin-validator")
 const {User} = require("../../models/user")
 const {Article} = require("../../models/article")
-
+const {Files} = require("../../models/files")
 const {LoginType} = require("../enum")
 
 class PositiveIntegerValidator extends LinValidator{
@@ -207,6 +207,34 @@ class FollowValidator extends LinValidator{
     }
   }
 }
+class FolderValidator extends LinValidator{
+  constructor(){
+    super()
+  }
+  async validateFolder(vals){
+    if(vals.body.parent_fileid&&vals.body.parent_filename){
+      const id = vals.body.parent_fileid
+      const origin_name = vals.body.parent_filename
+      const files = await Files.findOne({
+        where:{
+          id:id,
+          origin_name:origin_name
+        }
+      })
+      if(!files){
+        throw new Error('参数错误')
+      }
+    }
+  }
+}
+class OrgMemberValidator extends LinValidator{
+  constructor(){
+    super()
+  }
+  async validateMember(vals){
+    
+  }
+}
 // class LikeValidator extends PositiveIntegerValidator{
 //   constructor(){
 //     super()
@@ -226,5 +254,6 @@ module.exports = {
   ArticleInfoValidator,
   FollowValidator,
   CommentValidator,
-  UpdateArticle
+  UpdateArticle,
+  FolderValidator
 }

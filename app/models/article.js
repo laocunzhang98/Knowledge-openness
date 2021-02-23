@@ -45,7 +45,12 @@ Article.init({
     type:Sequelize.INTEGER
   },
   organize_id:{
-    type:Sequelize.INTEGER
+    type:Sequelize.INTEGER,
+    defaultValue:0
+  },
+  public:{
+    type:Sequelize.INTEGER,
+    defaultValue:1
   }
 },{
   sequelize:db,

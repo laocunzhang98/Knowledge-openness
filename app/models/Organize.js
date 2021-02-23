@@ -6,19 +6,23 @@ class Organize extends Model{
 
 }
 Organize.init({
-  id:{
+  team_id:{
     type:DataTypes.UUID,
     defaultValue:function(){
       return RandNum()
     },
-    primaryKey:true,
-    unique: true,
   },
   uid:{
     type:Sequelize.INTEGER
   },
   team_name:{
     type:Sequelize.STRING
+  },
+  level:{
+    type:Sequelize.INTEGER
+  },
+  member_id:{
+    type:Sequelize.INTEGER
   }
 },{
   sequelize:db,
