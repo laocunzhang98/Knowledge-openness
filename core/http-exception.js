@@ -109,6 +109,23 @@ class FollowMineError extends HttpException{
   }
 }
 
+class OrgJoinError extends HttpException{
+  constructor(msg,errorCode){
+    super()
+    this.code = 400
+    this.msg = msg || "你已经加入该圈子"
+    this.errorCode = errorCode || 10000
+  }
+}
+class OrgLeaveError extends HttpException{
+  constructor(msg,errorCode){
+    super()
+    this.code = 400
+    this.msg = msg || "你尚未加入该圈子"
+    this.errorCode = errorCode || 10000
+  }
+}
+
 module.exports = {
   HttpException,
   ParameterException,
@@ -122,5 +139,7 @@ module.exports = {
   EmailError,
   FollowError,
   FileError,
-  FollowMineError
+  FollowMineError,
+  OrgJoinError,
+  OrgLeaveError
 }

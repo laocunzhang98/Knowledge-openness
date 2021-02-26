@@ -1,5 +1,5 @@
 const  {db} = require("../../core/db")
-const {Model,Sequelize} = require('sequelize')
+const {Model,Sequelize,DataTypes} = require('sequelize')
 
 class Notice extends Model{
   static async link(uid,socket_id){
@@ -9,29 +9,33 @@ class Notice extends Model{
       }
     })
     if(notice){
-      await Notice.update({uid:uid,socket_id:socket_id},{
+      await Notice.update({online:1,uid:uid,socket_id:socket_id},{
         where:{
           uid:uid
         }
       })
     }
     else{
+      if(!uid){
+        return
+      }
       await Notice.create({
         uid,
-        socket_id
+        socket_id,
+        online:1
       })
     }
   }
   static async find(uid){
     const notice = await Notice.findOne({
       where:{
-        uid:uid
+        uid:uid,
       }
     })
-    return notice.socket_id
+    return notice
   }
-  static async deluid(socket_id){
-    const del = await Notice.destroy({
+  static async Offline(socket_id){
+    await Notice.update({online:0},{
       where:{
         socket_id:socket_id
       },
@@ -39,14 +43,35 @@ class Notice extends Model{
   }
 }
 class NoticeInfo extends Model{
-
+  static async createInfo(type,sponsor,receiver,article_id,notice_info,consult){
+    await NoticeInfo.create({
+      type,
+      sponsor,
+      receiver,
+      target_id:article_id,
+      notice_info,
+      consult
+    })
+  }
 }
 NoticeInfo.init({
-  socket_id:{
+  type:{
     type:Sequelize.STRING
   },
-  notice_info:{
+  sponsor:{
+    type:Sequelize.INTEGER
+  },
+  receiver:{
+    type:Sequelize.INTEGER
+  },
+  target_id:{
     type:Sequelize.STRING
+  },
+  consult:{
+    type:Sequelize.INTEGER
+  },
+  notice_info:{
+    type:DataTypes.TEXT
   }
 },{
   sequelize:db,
@@ -58,6 +83,9 @@ Notice.init({
   },
   socket_id:{
     type:Sequelize.STRING
+  },
+  online:{
+    type:Sequelize.INTEGER
   }
 },{
   sequelize:db,

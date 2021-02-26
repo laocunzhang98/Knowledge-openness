@@ -20,8 +20,8 @@ router.post("/", new Auth().m, async ctx=>{
     oid = v.get("body.oid")
   }
   let content = v.get("body.content")
-  await Comment.comment(article_id,article_uid,ctx.auth.uid,oid,content,comment_id)
-  success("success","评论成功")
+  const comment = await Comment.comment(article_id,article_uid,ctx.auth.uid,oid,content,comment_id)
+  success(comment,"评论成功")
 })
 
 

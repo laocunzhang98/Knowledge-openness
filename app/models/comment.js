@@ -5,8 +5,8 @@ const {Article}  = require('./article')
 
 class Comment extends Model{
   static async comment(article_id,article_uid,uid,oid,content,comment_id){
-    db.transaction(async t=>{
-      await Comment.create({
+    return db.transaction(async t=>{
+      const comment = await Comment.create({
         article_id,
         article_uid,
         uid,
@@ -22,6 +22,7 @@ class Comment extends Model{
       await article.increment('com_nums',{
         by:1,transaction:t
       })
+      return comment
     })
   }
 }

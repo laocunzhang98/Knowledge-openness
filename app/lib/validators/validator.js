@@ -12,16 +12,7 @@ class PositiveIntegerValidator extends LinValidator{
     ]
   }
 }
-class NotEmptyValidator extends LinValidator{
-  constructor(){
-    super()
-    this.token = [
-      new Rule('isLength','不允许为空',{
-        min:1
-      })
-    ]
-  }
-}
+
 class RegisterValidator extends LinValidator{
   constructor(){
     super()
@@ -148,7 +139,6 @@ class ArticleInfoValidator extends LinValidator{
     ]
   }
 }
-
 class ArticleValidator extends LinValidator{
   constructor(){
     super()
@@ -157,7 +147,6 @@ class ArticleValidator extends LinValidator{
     ]
   }
 }
-
 class CommentValidator extends LinValidator{
   constructor(){
     super()
@@ -227,19 +216,43 @@ class FolderValidator extends LinValidator{
     }
   }
 }
+
 class OrgMemberValidator extends LinValidator{
   constructor(){
     super()
   }
   async validateMember(vals){
-    
+    console.log(vals)
   }
 }
-// class LikeValidator extends PositiveIntegerValidator{
-//   constructor(){
-//     super()
-//   }
-// }
+class NotEmptyValidator extends LinValidator{
+  constructor(){
+    super()
+    this.token = [
+      new Rule('isLength','不允许为空',{
+        min:1
+      })
+    ]
+  }
+}
+class OrgInfoValidator extends LinValidator{
+  constructor(){
+    super()
+    this.team_name = [
+      new Rule('isLength',"长度为2-20个字符",{
+        min:2,
+        max:20
+      })
+    ],
+    this.describe = [
+      new Rule("isLength","长度为5-200个字符",{
+        min:5,
+        max:200
+      })
+    ]
+  }
+}
+
 
 
 module.exports = {
@@ -255,5 +268,7 @@ module.exports = {
   FollowValidator,
   CommentValidator,
   UpdateArticle,
-  FolderValidator
+  FolderValidator,
+  OrgMemberValidator,
+  OrgInfoValidator
 }

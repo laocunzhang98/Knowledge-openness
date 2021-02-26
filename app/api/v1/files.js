@@ -1,31 +1,33 @@
 const Router = require('koa-router')
-const { Auth } = require('../../../middlewares/auth')
+const { Auth,OrgAuth } = require('../../../middlewares/auth')
 const {Files} = require("../../models/files")
-
 const send = require("koa-send")
 const { success } = require('../../lib/helper')
 const {Op} = require("sequelize")
 const router = new Router({
   prefix:"/v1/download"
 })
+// 获取圈子文件
 
 
-router.get("/file/:origin_path/:filename",new Auth().m,async ctx=>{
-  // let path = `public/uploads/files/${ctx.params.origin_path}/${ctx.params.filename}`
-  let path = `${global.config.Basepath}/files/${ctx.params.origin_path}/${ctx.params.filename}`
-  console.log(path)
-  success(path)
-})
-
-router.get("/filelist", new Auth().m, async ctx =>{
+// 获取文件列表
+router.get("/filelist", new Auth().m,new OrgAuth().n, async ctx =>{
+  let condition = {
+    parent_fileid:ctx.query.id || 0,
+  }
+  if(ctx.organize_id){
+    condition.organize_id = ctx.organize_id
+  }
+  else{
+    condition.uid = ctx.auth.uid
+    condition.organize_id = 0
+  }
   const fileList = await Files.findAll({
-    where:{
-      parent_fileid:ctx.query.id || 0,
-      uid:ctx.auth.uid
-    }
+    where:condition
   })
   let newfileList = []
   for(let file of fileList){
+    // 图片展示为自己本身
     if(file.mimetype==="png"||file.mimetype==="jpeg"){
       file.dataValues.path = `${global.config.Basepath}/files/${file.origin_path}/${file.filename}`
     }
@@ -33,6 +35,7 @@ router.get("/filelist", new Auth().m, async ctx =>{
   }
   success(newfileList)
 })
+// 获取文件id
 router.get("/folderid", new Auth().m,async ctx =>{
   const files = await Files.findOne({
     where:{
@@ -43,6 +46,7 @@ router.get("/folderid", new Auth().m,async ctx =>{
   })
   success(files)
 })
+// 获取文件目录
 router.get("/catalog", new Auth().m, async ctx =>{
   let catalog = []
   let parentCata = await Files.findOne({
@@ -69,7 +73,7 @@ router.get("/catalog", new Auth().m, async ctx =>{
   console.log(catalog)
   success(catalog)
 })
-
+// 获取分类文件
 router.get("/catefile",new Auth().m,async ctx=>{
   let type = JSON.parse(ctx.query.type)
   let cate = {
@@ -81,7 +85,6 @@ router.get("/catefile",new Auth().m,async ctx=>{
   else{
     cate.parent_fileid =  0
   }
-  console.log(cate)
   const fileList = await Files.findAll({
     where:cate
   })
@@ -94,6 +97,7 @@ router.get("/catefile",new Auth().m,async ctx=>{
   }
   success(newfileList)
 } )
+// 删除文件
 router.delete("/delfile",new Auth().m, async ctx=>{
   let files = await Files.findAll({
     where:{

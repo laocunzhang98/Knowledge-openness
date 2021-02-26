@@ -115,6 +115,9 @@ router.get("/userinfo", new Auth().m, async (ctx) => {
       "follow_nums"
     ]
   })
+  if(!user){
+    throw new global.errs.NotFound()
+  }
   success(user)
 })
 

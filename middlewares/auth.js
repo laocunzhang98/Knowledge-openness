@@ -1,6 +1,7 @@
 const basicAuth = require('basic-auth')
 const jwt = require('jsonwebtoken')
 const { User } = require('../app/models/user')
+const {Organize,Orgmember} = require("../app/models/Organize")
 class Auth {
   constructor(level){
     this.level = level || 1
@@ -10,7 +11,6 @@ class Auth {
   }
   get m(){
     return async (ctx,next)=>{
-      
       const userToken = basicAuth(ctx.req)
       let errmsg = '密码不正确，请重新输入！'
       let errorCode = 4001
@@ -59,7 +59,25 @@ class Auth {
     }
   }
 }
-
+class OrgAuth{
+  get n(){
+    return async (ctx,next)=>{
+      const isOrg = await Orgmember.findOne({
+        where:{
+          member_id:ctx.auth.uid
+        }
+      })
+      if(!isOrg){
+        throw new global.errs.NotFound()
+      }
+      if(ctx.query.organize_id){
+        ctx.organize_id = ctx.query.organize_id
+      }
+      await next()
+    }
+  }
+}
 module.exports = {
-  Auth
+  Auth,
+  OrgAuth
 }
