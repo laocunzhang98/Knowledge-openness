@@ -5,6 +5,7 @@ const {OrgInfoValidator} = require("../../lib/validators/validator")
 const {Organize , Orgmember} = require("../../models/Organize")
 const {Op} = require("sequelize")
 const {db} = require("../../../core/db")
+const {ApplyInfo} = require("../../models/apply")
 const router = new Router({
   prefix:"/v1/organize"
 })
@@ -13,27 +14,34 @@ router.post("/create",new Auth().m,async ctx=>{
   const organize = await Organize.create({
     team_name:ctx.request.body.team_name,
     uid:ctx.auth.uid,
+    total:1
+
   })
   await Orgmember.create({
     team_id:organize.team_id,
     member_id:ctx.auth.uid,
     level:32,
-    total:1
   })
   success("团队创建成功","团队创建成功")
   }
 )
 // 获取组织信息
 router.get("/orginfo",new Auth().m,async ctx=>{
-
+  const orginfo = await Organize.findOne({
+    where:{
+      team_id:ctx.query.team_id
+    }
+  })
+  success(orginfo)
 })
+// 更新信息
 router.post("/updateinfo", new Auth().m, async ctx =>{
   const v = await new OrgInfoValidator().validate(ctx)
   let team_name = v.get("body.team_name")
   let describe = v.get("body.describe")
   let avatar = v.get("body.avatar")
   let team_id = v.get("body.team_id")
-  await Organize.update({
+  const org = await Organize.update({
     team_name,
     describe,
     avatar
@@ -43,7 +51,10 @@ router.post("/updateinfo", new Auth().m, async ctx =>{
       uid:ctx.auth.uid
     }
   })
-  success("更新成功")
+  if(!org[0]){
+    success("更新失败","更新失败")
+  }
+  success("更新成功","更新成功")
 })
 // 离开组织
 router.post("/leave",new Auth().m, async ctx=>{
@@ -73,10 +84,12 @@ router.post("/leave",new Auth().m, async ctx=>{
 })
 // 加入组织 未完成
 router.post("/join",new Auth().m,async ctx=>{
-  let team_id = ctx.request.body.team_id
+  let team_id = ctx.request.body.target_id
+  let uid = ctx.request.body.sponsor
   const member = await Orgmember.findOne({
     where:{
-      team_id:team_id
+      team_id:team_id,
+      member_id:uid
     }
   })
   if(member){
@@ -86,7 +99,7 @@ router.post("/join",new Auth().m,async ctx=>{
   db.transaction(async t=>{
     await Orgmember.create({
       team_id:team_id,
-      member_id:ctx.auth.uid,
+      member_id:uid,
       level:0
     },{transaction:t})
     const org = await Organize.findOne({
@@ -95,13 +108,14 @@ router.post("/join",new Auth().m,async ctx=>{
       }
     })
     await org.increment("total",{by:1,transaction:t})
+    await ApplyInfo.handleApply("同意",uid,team_id)
   })
   
-  success(`加入${org.team_name}成功！`)
+  success(`加入圈子成功！`,'同意加入圈子')
 })
 // 获取自己在组织中的权限
 router.get("/level",new Auth().m, async ctx=>{
-  const level = await Organize.findOne({
+  const level = await Orgmember.findOne({
     where:{
       member_id:ctx.auth.uid,
       team_id:ctx.query.team_id
@@ -170,9 +184,15 @@ router.get("/teamid",new Auth().m, async ctx=>{
   })
   success(team)
 })
-
+// 获取圈子列表
+router.get("/orglist",new Auth().m, async ctx =>{
+  const orglist = await Organize.findAll({
+    where:{
+    }
+  })
+  success(orglist)
+})
 // router.get("/")
-
 
 module.exports = router
 

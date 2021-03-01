@@ -1,4 +1,7 @@
 const {Notice,NoticeInfo} = require("../app/models/notice")
+const {ApplyInfo} = require("../app/models/apply")
+const {Organize, Orgmember} = require("../app/models/Organize")
+const {success} = require("../app/lib/helper")
 monitor = async function(socket,io){
   console.log("连接成功！")
   await socket.on("disconnect",async ()=>{
@@ -29,10 +32,7 @@ monitor = async function(socket,io){
     consult = 0
     const notice = await Notice.find(id)
     const socket_id = notice.socket_id
-    if(!notice.online){
-      // 提示信息存储到数据库
-    }
-    else{
+    if(notice.online){
       setTimeout(() => {
         io.to(socket_id).emit("reply",val)
       }, 2000);
@@ -48,9 +48,66 @@ monitor = async function(socket,io){
         consult:0
       }
     })
-    await io.to(socket.id).emit("login",noticeInfo)
+    const applyInfo = await ApplyInfo.findAndCountAll({
+      where:{
+        receiver:val,
+        consult:0
+      }
+    })
+    let info = {
+      noticeInfo:noticeInfo,
+      applyInfo:applyInfo
+    }
+    await io.to(socket.id).emit("login",info)
   })
-
+  await socket.on("apply", async (val)=>{
+    let org = await Organize.findOne({
+      where:{
+        team_id:val.team_id
+      }
+    })
+    if(!org){
+      throw new Error("该圈子不存在")
+    }
+    const notice = await Notice.find(val.uid)
+    const socket_id = notice.socket_id
+    const unotice = await Notice.find(val.sponsor)
+    const usocket_id = unotice.socket_id
+    let orgmember  = await Orgmember.findOne({
+      where:{
+        member_id:val.sponsor,
+        team_id:val.team_id
+      }
+    })
+    console.log(orgmember)
+    if(orgmember){
+      io.to(usocket_id).emit("error","你已经加入该圈子，请勿重复提交")
+      return 
+    }
+    const ainfo = await ApplyInfo.findOne({
+      where:{
+        sponsor:val.sponsor,
+        target_id:val.team_id
+      }
+    })
+    if(ainfo){
+      io.to(usocket_id).emit("error","请勿重复提交")
+      return 
+    }
+    if(notice.online){
+      setTimeout(() => {
+        io.to(socket_id).emit("apply",val)
+      }, 1000);
+    }
+    await ApplyInfo.create({
+      type:val.noticeType,
+      sponsor:val.sponsor,
+      receiver:val.uid,
+      target_id:val.team_id,
+      consult:0,
+    })
+    io.to(usocket_id).emit("error","申请消息已发送")
+  })
 }
 
 module.exports ={

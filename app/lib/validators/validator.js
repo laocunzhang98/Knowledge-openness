@@ -3,7 +3,7 @@ const {User} = require("../../models/user")
 const {Article} = require("../../models/article")
 const {Files} = require("../../models/files")
 const {LoginType} = require("../enum")
-
+const {Organize} =  require("../../models/Organize")
 class PositiveIntegerValidator extends LinValidator{
   constructor(){
     super()
@@ -235,6 +235,24 @@ class NotEmptyValidator extends LinValidator{
     ]
   }
 }
+class OrgLimitMemberValidator extends LinValidator{
+  constructor(){
+    super()
+  }
+  async validateLimit(vals){
+    const org = await Organize.findOne({
+      where:{
+        team_id:vals.body.team_id
+      }
+    })
+    if(!org){
+      throw new Error("不存在该饭圈！")
+    }
+    if(org.total>=org.limit_total){
+      throw new Error("人数达到上限！")
+    }
+  }
+}
 class OrgInfoValidator extends LinValidator{
   constructor(){
     super()
@@ -270,5 +288,6 @@ module.exports = {
   UpdateArticle,
   FolderValidator,
   OrgMemberValidator,
-  OrgInfoValidator
+  OrgInfoValidator,
+  OrgLimitMemberValidator
 }
