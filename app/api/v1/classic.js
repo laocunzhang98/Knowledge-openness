@@ -1,5 +1,5 @@
 const Router = require("koa-router")
-const { Auth,OrgAuth } = require('../../../middlewares/auth')
+const { Auth,OrgAuth,OrgArticle} = require('../../../middlewares/auth')
 const { Op, Sequelize } = require("sequelize")
 const { success } = require("../../lib/helper")
 const { Article } = require("../../models/article")
@@ -72,7 +72,7 @@ router.post('/pub', new Auth().m, upload.single('file'), async (ctx, next) => {
   success({ article_id: article.id, title: article.title }, "发表成功,快去看看吧！")
 })
 // 通过文章返回用户信息
-router.get('/article/follow/:id', new Auth().m, async (ctx, next) => {
+router.get('/article/follow/:id', new Auth().m, new OrgArticle().k,async (ctx, next) => {
   const v = await new ArticleValidator().validate(ctx)
   // console.log(v.get("path.id"))
   const article_id = ctx.params.id

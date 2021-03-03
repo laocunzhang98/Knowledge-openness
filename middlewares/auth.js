@@ -2,6 +2,7 @@ const basicAuth = require('basic-auth')
 const jwt = require('jsonwebtoken')
 const { User } = require('../app/models/user')
 const {Organize,Orgmember} = require("../app/models/Organize")
+const {Article} = require("../app/models/article")
 class Auth {
   constructor(level){
     this.level = level || 1
@@ -74,9 +75,10 @@ class OrgAuth{
       const isOrg = await Orgmember.findOne({
         where:{
           member_id:ctx.auth.uid,
-          team_id:ctx.organize_id||0
+          team_id:ctx.organize_id || 0
         }
       })
+      console.log(isOrg)
       if(!isOrg){
         throw new global.errs.NotFound()
       }
@@ -91,7 +93,34 @@ class OrgAuth{
     }
   }
 }
+
+class OrgArticle{
+  get k(){
+    return async (ctx, next)=>{
+      const article = await Article.findOne({
+        where:{
+          id:ctx.params.id
+        }
+      })
+      if(article.organize_id ==0){
+        await next()
+      }
+      const member = await Orgmember.findOne({
+        where:{
+          team_id:article.organize_id,
+          member_id:ctx.auth.uid
+        }
+      })
+      if(!member){
+        throw new global.errs.NotFound()
+      }
+      await next()
+    }
+  }
+}
+
 module.exports = {
   Auth,
-  OrgAuth
+  OrgAuth,
+  OrgArticle
 }

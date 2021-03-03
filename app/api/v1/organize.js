@@ -27,7 +27,16 @@ router.post("/create",new Auth().m,async ctx=>{
   }
 )
 // 获取组织信息
-router.get("/orginfo",new Auth().m,async ctx=>{
+router.get("/orginfo",new Auth().m, async ctx=>{
+  const member = await Orgmember.findOne({
+    where:{
+      team_id:ctx.query.team_id,
+      member_id:ctx.auth.uid
+    }
+  })
+  if(!member){
+    throw new global.errs.NotFound()
+  }
   const orginfo = await Organize.findOne({
     where:{
       team_id:ctx.query.team_id
