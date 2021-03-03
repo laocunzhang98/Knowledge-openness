@@ -15,7 +15,7 @@ router.get("/filelist", new Auth().m,new OrgAuth().n, async ctx =>{
   let condition = {
     parent_fileid:ctx.query.id || 0,
   }
-  if(ctx.organize_id){
+  if(parseInt(ctx.organize_id)){
     condition.organize_id = ctx.organize_id
   }
   else{
@@ -76,8 +76,10 @@ router.get("/catalog", new Auth().m, async ctx =>{
 // 获取分类文件
 router.get("/catefile",new Auth().m,async ctx=>{
   let type = JSON.parse(ctx.query.type)
+  let organize_id= ctx.query.organize_id || 0
   let cate = {
     uid:ctx.auth.uid,
+    organize_id:organize_id
   }
   if(type.length!==0){
     cate.mimetype =  {[Op.or]: type}

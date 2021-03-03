@@ -5,7 +5,7 @@ const {Classify} = require("../../models/classify")
 const router = new Router({
   prefix:'/v1/classify'
 })
-
+// 获取分类
 router.get("/", new Auth().m, async(ctx)=>{
   const classify = await Classify.findAll({
     group:"classify_name",

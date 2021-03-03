@@ -11,7 +11,6 @@ monitor = async function(socket,io){
   })
   // 评论通信
   await socket.on("comment",async (val)=>{
-    console.log(val)
     let id,type,sponsor,receiver,article_id,consult,content
     if(val.oid==0){
       id = val.article_uid
@@ -79,9 +78,8 @@ monitor = async function(socket,io){
         team_id:val.team_id
       }
     })
-    console.log(orgmember)
     if(orgmember){
-      io.to(usocket_id).emit("error","你已经加入该圈子，请勿重复提交")
+      io.to(usocket_id).emit("error","你已经加入该圈子")
       return 
     }
     const ainfo = await ApplyInfo.findOne({

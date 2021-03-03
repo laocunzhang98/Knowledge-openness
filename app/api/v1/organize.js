@@ -1,5 +1,6 @@
 const Router = require('koa-router')
-const { Auth } = require('../../../middlewares/auth')
+const { Auth, OrgAuth } = require('../../../middlewares/auth')
+const {User} = require("../../models/user")
 const {success} = require('../../lib/helper')
 const {OrgInfoValidator} = require("../../lib/validators/validator")
 const {Organize , Orgmember} = require("../../models/Organize")
@@ -14,8 +15,8 @@ router.post("/create",new Auth().m,async ctx=>{
   const organize = await Organize.create({
     team_name:ctx.request.body.team_name,
     uid:ctx.auth.uid,
-    total:1
-
+    total:1,
+    avatar:`${global.config.Basepath}/user/tuandui.png`
   })
   await Orgmember.create({
     team_id:organize.team_id,
@@ -193,6 +194,72 @@ router.get("/orglist",new Auth().m, async ctx =>{
   success(orglist)
 })
 // router.get("/")
+router.get("/members", new Auth().m, async ctx=>{
+  let organize_id = ctx.query.organize_id
+  const members = await Orgmember.findAndCountAll({
+    where:{
+      team_id:organize_id
+    }
+  })
+  for(let member of members.rows){
+    const user = await User.findOne({
+      where:{
+        id:member.member_id
+      }
+    })
+    member.dataValues.email = user.email
+    member.dataValues.nickname = user.nickname
+  }
+  success(members)
+})
+// 修改成员等级
+router.post("/modifylevel", new Auth().m,new OrgAuth().n, async ctx=>{
+  let level = ctx.request.body.level
+  let uid = ctx.request.body.uid
+  let team_id = ctx.request.body.organize_id
+  let ulevel = ctx.request.body.ulevel
+  if(uid===ctx.auth.uid || ulevel>=ctx.org.level){
+    throw new global.errs.OrgLevelError("无权限更改")
+  }
+  await Orgmember.update({level:level},{
+    where:{
+      member_id:uid,
+      team_id:team_id
+    }
+  })
+  success("设置成功！","设置成功")
+})
+// 成员移除
+router.delete("/remove", new Auth().m, new OrgAuth().n,async ctx =>{
+  let team_id = ctx.organize_id
+  let member_id = ctx.request.body.member_id
+  let ulevel = ctx.request.body.ulevel
+  if(ulevel>=ctx.org.level){
+    throw new global.errs.OrgLevelError("无权限移除")
+  }
+  
+  db.transaction(async t=>{
+    await Orgmember.destroy({
+      where:{
+        team_id,
+        member_id
+      }
+    },{transaction:t})
+    const org = await Organize.findOne({
+      where:{
+        team_id:team_id
+      }
+    })
+  await org.decrement("total",{by:1,transaction:t})
+  })
+  await ApplyInfo.destroy({
+    where:{
+      sponsor:member_id,
+      target_id:team_id
+    }
+  })
+  success("移除成功","移除成功")
+})
 
 module.exports = router
 

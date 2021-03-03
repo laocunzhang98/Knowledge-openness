@@ -62,16 +62,27 @@ class Auth {
 class OrgAuth{
   get n(){
     return async (ctx,next)=>{
+      if(ctx.query.organize_id){
+        ctx.organize_id = ctx.query.organize_id
+      }
+      if(ctx.request.body.organize_id){
+        ctx.organize_id = ctx.request.body.organize_id
+      }
       const isOrg = await Orgmember.findOne({
         where:{
-          member_id:ctx.auth.uid
+          member_id:ctx.auth.uid,
+          team_id:ctx.organize_id||0
         }
       })
       if(!isOrg){
         throw new global.errs.NotFound()
       }
-      if(ctx.query.organize_id){
-        ctx.organize_id = ctx.query.organize_id
+      
+      if(isOrg.level<16){
+        throw new global.errs.OrgLevelError()
+      }
+      ctx.org = {
+        level:isOrg.level
       }
       await next()
     }

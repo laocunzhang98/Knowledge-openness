@@ -9,7 +9,7 @@ const { success } = require('../../lib/helper')
 const router = new Router({
   prefix:'/v1/token',
 })
-
+// 选择登陆方式
 router.post('/', async (ctx)=>{
   const v = await new TokenValidator().validate(ctx)
   switch(v.get('body.type')){
@@ -34,7 +34,7 @@ router.post('/', async (ctx)=>{
 router.post("/admin",async (ctx)=>{
 
 })
-
+// 验证token
 router.post('/verify',async (ctx)=>{
   const v = await new NotEmptyValidator().validate(ctx)
   const res = Auth.verifyToken(v.get('body.token'))

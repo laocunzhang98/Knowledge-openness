@@ -105,22 +105,7 @@ router.get('/article/:id', new Auth().m, async (ctx, next) => {
   if (!article) {
     throw new global.errs.NotFound()
   }
-  // if(article.public==0){
-  //   if(article.organize_id != 0){
-  //     const isOrg = await Organize.findOne({
-  //       where:{
-  //         member_id:ctx.auth.uid,
-  //         team_id:article.organize_id
-  //       }
-  //     })
-  //     if(!isOrg){
-  //       throw new global.errs.NotFound()
-  //     }
-  //   }else{
-  //     throw new global.errs.NotFound()
-  //   }
-  // }
-  
+
   const user = await User.findOne({
     where: {
       id: article.uid
@@ -176,7 +161,7 @@ router.get('/latest', new Auth().m, async (ctx, next) => {
     countSize: r.count
   })
 })
-// 获取用户文章列表 （未完成）
+// 获取用户文章列表 
 router.get("/userarticle", new Auth().m, async (ctx) => {
   let uid = ctx.query.uid || ctx.auth.uid
   const article = await Article.findAll({

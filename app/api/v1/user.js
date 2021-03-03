@@ -10,7 +10,7 @@ const router = new Router({
 })
 
 const Store = new Redis().client
-
+// 发送邮件
 router.post('/sendmail', async (ctx) => {
   const v = await new EmailValidator().validate(ctx)
   // await Store.hget(`${v.get("body.email")}`)
@@ -65,7 +65,7 @@ router.post('/sendmail', async (ctx) => {
     success('SUCCESS', '邮件发送成功')
   }
 })
-
+// 注册
 router.post('/register', async (ctx) => {
   // 接收参数
   const v = await new RegisterValidator().validate(ctx)
@@ -84,7 +84,7 @@ router.post('/register', async (ctx) => {
   const r = await User.create(user)
   success('注册成功', "注册成功")
 })
-
+// 超级管理员
 router.post('/supermanager', async (ctx) => {
   const v = await new RegisterValidator().validate(ctx)
   const user = {
@@ -97,7 +97,7 @@ router.post('/supermanager', async (ctx) => {
   const r = await User.create(user)
   success()
 })
-
+// 获取个人信息
 router.get("/userinfo", new Auth().m, async (ctx) => {
   let id = ctx.query.id || ctx.auth.uid
   const user = await User.findOne({
@@ -121,7 +121,7 @@ router.get("/userinfo", new Auth().m, async (ctx) => {
   success(user)
 })
 
-
+// 更新信息
 router.put("/update", new Auth().m, async ctx => {
   let data = {
   }

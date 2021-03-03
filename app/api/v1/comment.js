@@ -9,7 +9,7 @@ const router = new Router({
   prefix:'/v1/comment',
 })
 
-
+// 评论
 router.post("/", new Auth().m, async ctx=>{
   const v = await new CommentValidator().validate(ctx)
   let article_id = v.get("body.article_id")
@@ -24,7 +24,7 @@ router.post("/", new Auth().m, async ctx=>{
   success(comment,"评论成功")
 })
 
-
+// 获取评论
 router.get("/getcomment", new Auth().m, async ctx =>{
   const article_id = ctx.query.article_id
   const comments = await Comment.findAll({
@@ -39,6 +39,7 @@ router.get("/getcomment", new Auth().m, async ctx =>{
     first:[],
     second:[]
   }
+  // 处理二级评论
   for(let comment of comments){
     const user = await User.findOne({
       where:{

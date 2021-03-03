@@ -48,7 +48,7 @@ router.get("/info", new Auth().m, async ctx => {
   // console.log(infos[0].dataValues)
   success(infos)
 })
-
+// 读取消息 下次免推送
 router.post("/readinfo", new Auth().m, async ctx => {
   let ids = ctx.request.body.ids
   NoticeInfo.update({ consult: 1 }, {
@@ -60,6 +60,7 @@ router.post("/readinfo", new Auth().m, async ctx => {
   })
   success()
 })
+// 读取消息 下次免推送
 router.post("/readapply", new Auth().m, async ctx => {
   let ids = ctx.request.body.aids
   ApplyInfo.update({ consult: 1 }, {
@@ -71,7 +72,7 @@ router.post("/readapply", new Auth().m, async ctx => {
   })
   success()
 })
-
+// 获取申请消息
 router.get("/applyinfo", new Auth().m, async ctx => {
   const applyInfo = await ApplyInfo.findAll({
     where: {
@@ -90,7 +91,7 @@ router.get("/applyinfo", new Auth().m, async ctx => {
   }
   success(applyInfo)
 })
-
+// 拒绝申请
 router.post("/refuseapply", new Auth().m, async ctx => {
   let sponsor = ctx.request.body.sponsor
   let target_id = ctx.request.body.target_id

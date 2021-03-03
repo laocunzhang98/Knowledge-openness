@@ -125,6 +125,14 @@ class OrgLeaveError extends HttpException{
     this.errorCode = errorCode || 10000
   }
 }
+class OrgLevelError extends HttpException{
+  constructor(msg,errorCode){
+    super()
+    this.code = 400
+    this.msg = msg || "你的权限不足"
+    this.errorCode = errorCode || 10000
+  }
+}
 
 module.exports = {
   HttpException,
@@ -141,5 +149,6 @@ module.exports = {
   FileError,
   FollowMineError,
   OrgJoinError,
-  OrgLeaveError
+  OrgLeaveError,
+  OrgLevelError
 }
