@@ -62,7 +62,8 @@ router.post("/leave",new Auth().m, async ctx=>{
   let team_id = ctx.request.body.team_id
   const member = await Orgmember.findOne({
     where:{
-      team_id:team_id
+      team_id:team_id,
+      member_id:ctx.auth.uid
     }
   })
   if(!member){
@@ -82,8 +83,15 @@ router.post("/leave",new Auth().m, async ctx=>{
     }
   })
   await org.decrement("total",{by:1,transaction:t})
+  await ApplyInfo.destroy({
+    where:{
+      sponsor:member_id,
+      target_id:team_id
+    }
+  })
+  success("退出成功","退出成功")
 })
-// 加入组织 未完成
+// 加入组织 
 router.post("/join",new Auth().m,async ctx=>{
   let team_id = ctx.request.body.target_id
   let uid = ctx.request.body.sponsor
@@ -237,7 +245,6 @@ router.delete("/remove", new Auth().m, new OrgAuth().n,async ctx =>{
   if(ulevel>=ctx.org.level){
     throw new global.errs.OrgLevelError("无权限移除")
   }
-  
   db.transaction(async t=>{
     await Orgmember.destroy({
       where:{

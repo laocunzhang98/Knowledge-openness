@@ -62,11 +62,14 @@ class Auth {
 class OrgAuth{
   get n(){
     return async (ctx,next)=>{
-      if(ctx.query.organize_id){
+      if(parseInt(ctx.query.organize_id)){
         ctx.organize_id = ctx.query.organize_id
       }
-      if(ctx.request.body.organize_id){
+      else if(ctx.request.body.organize_id){
         ctx.organize_id = ctx.request.body.organize_id
+      }
+      else{
+        await next()
       }
       const isOrg = await Orgmember.findOne({
         where:{

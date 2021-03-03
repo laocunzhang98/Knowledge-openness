@@ -26,7 +26,7 @@ router.post('/addpic',new Auth().m,upload.single('file'), async (ctx,next)=>{
 })
 
 // 上传文件
-router.post("/addfile",new Auth().m,async ctx=>{
+router.post("/addfile",new Auth().m, new OrgAuth().n,async ctx=>{
   let err = await file.single("file")(ctx)
     .then(res=>res)
     .catch(err=>err)

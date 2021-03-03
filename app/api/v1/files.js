@@ -11,12 +11,12 @@ const router = new Router({
 
 
 // 获取文件列表
-router.get("/filelist", new Auth().m,new OrgAuth().n, async ctx =>{
+router.get("/filelist", new Auth().m, async ctx =>{
   let condition = {
     parent_fileid:ctx.query.id || 0,
   }
-  if(parseInt(ctx.organize_id)){
-    condition.organize_id = ctx.organize_id
+  if(parseInt(ctx.query.organize_id)){
+    condition.organize_id = ctx.query.organize_id
   }
   else{
     condition.uid = ctx.auth.uid
@@ -70,7 +70,6 @@ router.get("/catalog", new Auth().m, async ctx =>{
     }
     catalog.unshift(parentCata.dataValues)
   }
-  console.log(catalog)
   success(catalog)
 })
 // 获取分类文件
@@ -115,13 +114,11 @@ router.delete("/delfile",new Auth().m, async ctx=>{
       }
     }
   })
-  console.log(files)
   while(files.length){
     let ids = []
     for(let file of files){
       ids.push(file.id)
     }
-    console.log(ids)
     files = await Files.findAll({
       where:{
         parent_fileid:{
