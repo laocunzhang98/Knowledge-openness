@@ -61,6 +61,9 @@ class Auth {
   }
 }
 class OrgAuth{
+  constructor(level){
+    this.level = level || 16
+  }
   get n(){
     return async (ctx,next)=>{
       if(parseInt(ctx.query.organize_id)){
@@ -78,11 +81,9 @@ class OrgAuth{
           team_id:ctx.organize_id || 0
         }
       })
-      console.log(isOrg)
       if(!isOrg){
         throw new global.errs.NotFound()
       }
-      
       if(isOrg.level<16){
         throw new global.errs.OrgLevelError()
       }
@@ -91,6 +92,9 @@ class OrgAuth{
       }
       await next()
     }
+  }
+  get m(){
+
   }
 }
 
@@ -102,7 +106,8 @@ class OrgArticle{
           id:ctx.params.id
         }
       })
-      if(article.organize_id ==0){
+      if(article.organize_id ==0 || article.public==1){
+        ctx.organize_id = article.organize_id
         await next()
       }
       const member = await Orgmember.findOne({
@@ -114,6 +119,8 @@ class OrgArticle{
       if(!member){
         throw new global.errs.NotFound()
       }
+      console.log(article.organize_id)
+      ctx.organize_id = member.team_id
       await next()
     }
   }

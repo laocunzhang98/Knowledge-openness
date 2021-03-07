@@ -30,11 +30,11 @@ class User extends Model {
   static async verifySuperManager(email){
     const level =  await User.findOne({
       where:{
-        emial:email
+        email:email
       },
       attributes:["level"]
     })
-    console.log(level)
+    return level
   }
   static async registerByOpenid(openid){
     return await User.create({

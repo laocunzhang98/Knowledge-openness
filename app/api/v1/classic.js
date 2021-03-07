@@ -8,7 +8,7 @@ const { User } = require("../../models/user")
 const { ArticleValidator, ArticleInfoValidator, UpdateArticle } = require("../../lib/validators/validator")
 const { db } = require("../../../core/db")
 const {Organize} = require("../../models/Organize")
-
+const {Log} = require("../../models/log")
 
 const router = new Router({
   prefix: '/v1/classic',
@@ -41,11 +41,18 @@ router.post("/update", new Auth().m, upload.single('file'), async (ctx, next) =>
     public: ctx.request.body.public,
     organize_id: ctx.request.body.organize_id
   },
-    {
-      where: {
-        id: ctx.request.body.article_id
-      }
-    })
+  {
+    where: {
+      id: ctx.request.body.article_id
+    }
+  })
+  await Log.create({
+    uid:ctx.auth.uid,
+    target_id:ctx.request.body.article_id,
+    type:"更新",
+    info:"更新文章",
+    team_id: ctx.request.body.organize_id
+  })
   success({ article_id: ctx.request.body.article_id, title: ctx.request.body.title }, "修改文章成功,快去看看吧！")
 })
 // 发表文章
@@ -69,10 +76,17 @@ router.post('/pub', new Auth().m, upload.single('file'), async (ctx, next) => {
     public: ctx.request.body.public,
     organize_id: ctx.request.body.organize_id
   })
+  await Log.create({
+    uid:ctx.auth.uid,
+    target_id:article.id,
+    type:"发表",
+    info:"发表文章",
+    team_id: ctx.request.body.organize_id
+  })
   success({ article_id: article.id, title: article.title }, "发表成功,快去看看吧！")
 })
 // 通过文章返回用户信息
-router.get('/article/follow/:id', new Auth().m, new OrgArticle().k,async (ctx, next) => {
+router.get('/article/follow/:id', new Auth().m, async (ctx, next) => {
   const v = await new ArticleValidator().validate(ctx)
   // console.log(v.get("path.id"))
   const article_id = ctx.params.id
@@ -94,7 +108,7 @@ router.get('/article/follow/:id', new Auth().m, new OrgArticle().k,async (ctx, n
   success(user.dataValues)
 })
 // 获取文章信息
-router.get('/article/:id', new Auth().m, async (ctx, next) => {
+router.get('/article/:id', new Auth().m, new OrgArticle().k,async (ctx, next) => {
   // const v = await new ArticleValidator().validate(ctx)
   const article_id = ctx.params.id
   const article = await Article.findOne({
@@ -117,6 +131,13 @@ router.get('/article/:id', new Auth().m, async (ctx, next) => {
   article.dataValues.describe = user.describe
   await article.increment('read_nums', {
     by: 1
+  })
+  await Log.create({
+    uid:ctx.auth.uid,
+    target_id:article_id,
+    type:"浏览",
+    info:"浏览文章",
+    team_id: ctx.organize_id
   })
   success(article.dataValues)
 })

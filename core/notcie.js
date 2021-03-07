@@ -93,6 +93,7 @@ monitor = async function(socket,io){
       return 
     }
     if(notice.online){
+      console.log(2222)
       setTimeout(() => {
         io.to(socket_id).emit("apply",val)
       }, 1000);

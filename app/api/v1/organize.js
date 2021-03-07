@@ -16,6 +16,8 @@ router.post("/create",new Auth().m,async ctx=>{
     team_name:ctx.request.body.team_name,
     uid:ctx.auth.uid,
     total:1,
+    open:ctx.request.body.isopen,
+    type:ctx.request.body.type,
     avatar:`${global.config.Basepath}/user/tuandui.png`
   })
   await Orgmember.create({
@@ -85,18 +87,18 @@ router.post("/leave",new Auth().m, async ctx=>{
         member_id:ctx.auth.uid,
       }
     },{transaction:t})
-  })
-  const org = await Organize.findOne({
-    where:{
-      team_id:team_id
-    }
-  })
-  await org.decrement("total",{by:1,transaction:t})
-  await ApplyInfo.destroy({
-    where:{
-      sponsor:member_id,
-      target_id:team_id
-    }
+    const org = await Organize.findOne({
+      where:{
+        team_id:team_id
+      }
+    })
+    await org.decrement("total",{by:1,transaction:t})
+    await ApplyInfo.destroy({
+      where:{
+        sponsor:ctx.auth.uid,
+        target_id:team_id
+      }
+    })
   })
   success("退出成功","退出成功")
 })
@@ -275,6 +277,39 @@ router.delete("/remove", new Auth().m, new OrgAuth().n,async ctx =>{
     }
   })
   success("移除成功","移除成功")
+})
+// 解散组织
+router.post("/dissolution", new Auth().m,async ctx =>{
+  let team_id = ctx.request.body.organize_id
+  const org = await Organize.destroy({
+    where:{
+      uid:ctx.auth.uid,
+      team_id:team_id
+    }
+  })
+  if(org){
+    await Orgmember.destroy({
+      where:{
+        team_id:team_id
+      }
+    })
+  }
+  // 删除相关文章
+  // 删除相关文件
+  // 删除组织成员
+  success("解散成功!","解散成功!")
+})
+
+router.post("/open",new Auth().m,new OrgAuth().n, async ctx=>{
+  let open = ctx.request.body.open
+  await Organize.update({
+    open:open
+  },{
+    where:{
+      team_id:ctx.organize_id
+    }
+  })
+  success("更新成功!","更新成功!")
 })
 
 module.exports = router

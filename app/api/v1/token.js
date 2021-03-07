@@ -50,6 +50,10 @@ async function emailLogin(account,secret){
 
 async function superManagerLogin(account,secret){
   const verified = await User.verifyEmailPassword(account,secret)
+  const level = await User.verifySuperManager(account)
+  if(level.level < 16){
+    throw new global.errs.AuthFailed('你的权限不足')
+  }
   return generateToken(verified.id, Auth.SUPER_ADMIN)
 }
 

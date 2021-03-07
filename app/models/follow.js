@@ -3,7 +3,7 @@ const  {db} = require("../../core/db")
 const {Model,Sequelize} = require('sequelize')
 const {User} = require("./user")
 const {FollowMineError} = require("../../core/http-exception")
-
+const {Log} = require("./log")
 class Follow extends Model{
   static async follow(uid,fid){
     if(uid==fid){
@@ -40,6 +40,12 @@ class Follow extends Model{
           by:1,transaction:t
         })
       })
+      await Log.create({
+        uid:uid,
+        target_id:fid,
+        type:"关注",
+        info:"取消关注",
+      })
     }
     else{
       db.transaction(async t=>{
@@ -64,7 +70,12 @@ class Follow extends Model{
           by:1,transaction:t
         })
       })
-      
+      await Log.create({
+        uid:uid,
+        target_id:fid,
+        type:"关注",
+        info:"关注",
+      })
     }
   }
 
