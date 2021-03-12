@@ -2,9 +2,11 @@ const Router = require("koa-router")
 const nodeMailer = require('nodemailer')
 const Redis = require('koa-redis')
 const { User } = require('../../models/user')
+const { Notice } = require('../../models/notice')
 const { RegisterValidator, EmailValidator } = require('../../lib/validators/validator')
 const { success } = require('../../lib/helper')
 const { Auth } = require("../../../middlewares/auth")
+const {Op, where} = require("sequelize")
 const router = new Router({
   prefix: '/v1/user'
 })
@@ -76,6 +78,8 @@ router.post('/register', async (ctx) => {
     email: v.get('body.email'),
     password: v.get('body.password2'),
     nickname: v.get('body.nickname'),
+    job:"自由职业",
+    describe:"我还没想好怎么介绍自己呢!",
     avatar: `${global.config.Avatar}`,
   }
   if (email !== user.email || savecode !== v.get("body.code").toLocaleLowerCase()) {
@@ -151,5 +155,65 @@ router.put("/update", new Auth().m, async ctx => {
   success("success","审核中")
 })
 
-
+// 查询用户数据
+router.get("/admin",new Auth(32).m,async ctx => {
+  const users = await User.findAndCountAll({
+    order: [
+      ["createdAt", "desc"]
+    ],
+    offset:0,
+    limit:10
+  })
+  for(let user of users.rows){
+    let notice = await Notice.findOne({
+      where:{
+        uid:user.id
+      }
+    })
+    user.dataValues.lastDate = notice.updatedAt
+  }
+  success(users)
+})
+// 管理员获取管理员列表
+router.get("/manager", new Auth(32).m,async ctx =>{
+  const users = await User.findAll({
+    where:{
+      level:{
+        [Op.gte]:16
+      }
+    }
+  })
+  success(users)
+})
+// 管理员获取用户信息
+router.get("/admin/info",new Auth(16).m,async ctx=>{
+  const user = await User.findOne({
+    where:{
+      id:ctx.query.uid
+    },
+    attributes:{
+      exclude:["password"]
+    }
+  })
+  success(user)
+})
+// 管理员修改用户信息
+router.post("/admin/upinfo",new Auth(16).m,async ctx=>{
+  let userInfo = ctx.request.body
+  await User.update(userInfo,{
+    where:{
+      id:userInfo.id
+    }
+  })
+  success("更新成功","更新成功")
+})
+// 修改管理员权限
+router.post("/admin/limit", new Auth(32).m,async ctx=>{
+  await User.update({
+    level:ctx.request.body.level
+  },{where:{
+    id:ctx.request.body.id
+  }})
+  success("修改成功!","修改成功!")
+})
 module.exports = router

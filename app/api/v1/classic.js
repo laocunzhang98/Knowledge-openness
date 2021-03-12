@@ -9,6 +9,7 @@ const { ArticleValidator, ArticleInfoValidator, UpdateArticle } = require("../..
 const { db } = require("../../../core/db")
 const {Organize} = require("../../models/Organize")
 const {Log} = require("../../models/log")
+const article = require("../../models/article")
 
 const router = new Router({
   prefix: '/v1/classic',
@@ -282,6 +283,44 @@ router.delete("/del", new Auth().m, async ctx => {
   }
   success("删除成功!","删除成功!")
 })
+// 后台接口
+router.get("/admin",new Auth(32).m,async ctx =>{
+  let pageSize = 10
+  let page = 0
+  const articles = await Article.findAndCountAll({
+    order: [
+      ["createdAt", "desc"]
+    ],
+    offset: pageSize * page,
+    limit: pageSize
+  })
+  for(let article of articles.rows){
+    const user = await User.findOne({
+      where:{
+        id:article.uid
+      }
+    })
+    article.dataValues.nickname = user.nickname
+  }
+  success(articles)
+})
+// 管理员删除文章
+router.delete("/admindel",new Auth(32).m, async ctx=>{
+  await Article.destroy({
+    where:{
 
-
+    }
+  })
+})
+// 管理员获取分类文章
+router.get("/classify", new Auth().m, async ctx=>{
+  let classify_art = await Article.count({
+    where:{
+      organize_id:ctx.query.organize_id
+    },
+    attributes: ['classify_name'],
+    group:"classify_name"
+  })
+  success(classify_art)
+})
 module.exports = router

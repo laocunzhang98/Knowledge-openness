@@ -212,7 +212,7 @@ router.get("/orglist",new Auth().m, async ctx =>{
   })
   success(orglist)
 })
-// router.get("/")
+// 获取成员列表
 router.get("/members", new Auth().m, async ctx=>{
   let organize_id = ctx.query.organize_id
   const members = await Orgmember.findAndCountAll({
@@ -311,6 +311,15 @@ router.post("/open",new Auth().m,new OrgAuth().n, async ctx=>{
   })
   success("更新成功!","更新成功!")
 })
-
+// 获取管理员人数
+router.get("/manager",new Auth().m, async ctx=>{
+  let manager = await Orgmember.findAndCountAll({
+    where:{
+      team_id:ctx.query.organize_id,
+      level:16
+    }
+  })
+  success(manager)
+})
 module.exports = router
 

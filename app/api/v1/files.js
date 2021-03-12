@@ -99,18 +99,18 @@ router.get("/catefile",new Auth().m,async ctx=>{
   success(newfileList)
 } )
 // 删除文件
-router.delete("/delfile",new Auth().m, async ctx=>{
+router.delete("/delfile",new Auth().m,new OrgAuth().n, async ctx=>{
   let files = await Files.findAll({
     where:{
       id:{
         [Op.in]:ctx.request.body.ids
-      }
+      },
     }
   })
   await Files.destroy({
     where:{
       id:{
-        [Op.in]:ctx.request.body.ids
+        [Op.in]:ctx.request.body.ids,
       }
     }
   })
@@ -123,18 +123,75 @@ router.delete("/delfile",new Auth().m, async ctx=>{
       where:{
         parent_fileid:{
           [Op.in]:ids
-        }
+        },
       }
     })
     await Files.destroy({
       where:{
         parent_fileid:{
           [Op.in]:ids
-        }
+        },
       }
     })
   }
   success(files,"删除成功！")
 })
 
+router.get("/allcate",new Auth().m,new OrgAuth().n, async ctx=>{
+
+  console.log(ctx.query)
+  let ids = JSON.parse(ctx.query.ids)|| []
+  let params = {
+    mimetype:"dir",
+    parent_fileid:0,
+    id:{
+      [Op.notIn]:ids
+    },
+    organize_id:0
+  }
+  let organize_id = ctx.query.organize_id
+  if(organize_id){
+    params.organize_id = organize_id
+  }else{
+    params.uid = ctx.auth.uid
+  }
+  const files = await Files.findAll({
+    where:params
+  })
+  for(let file of files){
+    params.parent_fileid = file.id
+    let childFile =  await Files.findAll({
+      where:params
+    })
+    file.dataValues.children = childFile
+    await convertChild(childFile)
+  }
+  async function convertChild(fileArr){
+    for(file of fileArr){
+      params.parent_fileid = file.id
+      let childFile = await Files.findAll({
+        where:params
+      })
+      file.dataValues.children = childFile
+      if(childFile){
+        await convertChild(childFile)
+      }
+    }
+  }
+  success(files)
+})
+
+
+router.post("/movefile", new Auth().m, async ctx=>{
+  let ids = ctx.request.body.moveId
+  let currentId = ctx.request.body.currentId
+  await Files.update({parent_fileid : currentId},{
+    where:{
+      id:{
+        [Op.in]:ids
+      }
+    }
+  })
+  success("移动成功","移动成功")
+})
 module.exports = router

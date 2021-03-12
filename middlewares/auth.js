@@ -66,6 +66,9 @@ class OrgAuth{
   }
   get n(){
     return async (ctx,next)=>{
+      if(ctx.auth.scope==32){
+        await next()
+      }
       if(parseInt(ctx.query.organize_id)){
         ctx.organize_id = ctx.query.organize_id
       }
@@ -84,7 +87,7 @@ class OrgAuth{
       if(!isOrg){
         throw new global.errs.NotFound()
       }
-      if(isOrg.level<16){
+      if(isOrg.level<this.level){
         throw new global.errs.OrgLevelError()
       }
       ctx.org = {
@@ -100,7 +103,11 @@ class OrgAuth{
 
 class OrgArticle{
   get k(){
+    
     return async (ctx, next)=>{
+      if(ctx.auth.scope==32){
+        await next()
+      }
       const article = await Article.findOne({
         where:{
           id:ctx.params.id

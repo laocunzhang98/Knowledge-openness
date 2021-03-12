@@ -39,7 +39,8 @@ router.post("/addfile",new Auth().m, new OrgAuth().n,async ctx=>{
     let data = {
       filename:ctx.req.file.filename,
       origin_path:path.resolve(ctx.req.file.destination).split("\\").pop(),
-      url:url
+      url:url,
+      size:ctx.req.file.size
     }
     success(data,"文件上传成功")
   } 
@@ -60,7 +61,8 @@ router.post("/destination", new Auth().m, new OrgAuth().n, async ctx=>{
     parent_filename:v.get("body.parent_filename")||"",
     mimetype:v.get("body.mimetype") || "dir",
     origin_path:`${temp.year}${temp.month}${temp.day}`,
-    organize_id:ctx.request.body.organize_id||0
+    organize_id:ctx.request.body.organize_id||0,
+    size:v.get("body.size")||0
   })
   success(files)
 })

@@ -51,6 +51,10 @@ Article.init({
   public:{
     type:Sequelize.INTEGER,
     defaultValue:1
+  },
+  isvio:{
+    type:Sequelize.INTEGER,
+    defaultValue:0
   }
 },{
   sequelize:db,
