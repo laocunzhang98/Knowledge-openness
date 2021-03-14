@@ -4,6 +4,7 @@ const {Files} = require("../../models/files")
 const send = require("koa-send")
 const { success } = require('../../lib/helper')
 const {Op} = require("sequelize")
+const { db } = require("../../../core/db")
 const router = new Router({
   prefix:"/v1/download"
 })
@@ -194,4 +195,31 @@ router.post("/movefile", new Auth().m, async ctx=>{
   })
   success("移动成功","移动成功")
 })
+
+router.get("/mimetype", new Auth().m, async ctx=>{
+  let mimetypes = await Files.findAll({
+    where:{
+      organize_id:ctx.query.organize_id,
+      mimetype:{
+        [Op.ne]:"dir"
+      }
+    },
+    attributes: [[db.fn('COUNT', db.col('*')), 'value'],['mimetype',"name"]],
+    group:"mimetype"
+  })
+  success(mimetypes)
+})
+
+router.get("/filetotal",new Auth().m, async ctx=>{
+  let filecount = await Files.count({
+    where:{
+      organize_id:ctx.query.organize_id,
+      mimetype:{
+        [Op.ne]:"dir"
+      }
+    }
+  })
+  success(filecount)
+})
+
 module.exports = router

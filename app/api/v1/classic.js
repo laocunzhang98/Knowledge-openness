@@ -314,13 +314,14 @@ router.delete("/admindel",new Auth(32).m, async ctx=>{
 })
 // 管理员获取分类文章
 router.get("/classify", new Auth().m, async ctx=>{
-  let classify_art = await Article.count({
+  let classify_art = await Article.findAll({
     where:{
       organize_id:ctx.query.organize_id
     },
-    attributes: ['classify_name'],
+    attributes: [[db.fn('COUNT', db.col('*')), 'value'],['classify_name',"name"]],
     group:"classify_name"
   })
+
   success(classify_art)
 })
 module.exports = router

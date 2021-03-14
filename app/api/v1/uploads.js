@@ -59,7 +59,7 @@ router.post("/destination", new Auth().m, new OrgAuth().n, async ctx=>{
     origin_name:v.get("body.origin_name") || v.get("body.filename"),
     parent_fileid:v.get("body.parent_fileid")||0,
     parent_filename:v.get("body.parent_filename")||"",
-    mimetype:v.get("body.mimetype") || "dir",
+    mimetype:v.get("body.mimetype")=="plain"?"text":v.get("body.mimetype") || "dir",
     origin_path:`${temp.year}${temp.month}${temp.day}`,
     organize_id:ctx.request.body.organize_id||0,
     size:v.get("body.size")||0

@@ -10,6 +10,7 @@ const router = new Router({
 
 router.post("/add",new Auth(16).m, async ctx=>{
   await Violation.create({
+    viouid:ctx.request.body.uid,
     
   })
 })
