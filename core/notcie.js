@@ -1,5 +1,5 @@
 const {Notice,NoticeInfo} = require("../app/models/notice")
-const {ApplyInfo} = require("../app/models/apply")
+const {ApplyInfo,SysApplyInfo} = require("../app/models/apply")
 const {Organize, Orgmember} = require("../app/models/Organize")
 const {success} = require("../app/lib/helper")
 monitor = async function(socket,io){
@@ -53,9 +53,16 @@ monitor = async function(socket,io){
         consult:0
       }
     })
+    const sysApplyInfo = await SysApplyInfo.findAndCountAll({
+      where:{
+        receiver:val,
+        consult:0
+      }
+    })
     let info = {
       noticeInfo:noticeInfo,
-      applyInfo:applyInfo
+      applyInfo:applyInfo,
+      sysApplyInfo:sysApplyInfo
     }
     await io.to(socket.id).emit("login",info)
   })
@@ -107,6 +114,11 @@ monitor = async function(socket,io){
     })
     io.to(usocket_id).emit("error","申请消息已发送")
   })
+  // await socket.on("sysapply",async (val)=>{
+  //   SysApplyInfo.create({
+      
+  //   })
+  // })
 }
 
 module.exports ={

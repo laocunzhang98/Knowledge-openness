@@ -216,4 +216,14 @@ router.post("/admin/limit", new Auth(32).m,async ctx=>{
   }})
   success("修改成功!","修改成功!")
 })
+// 封禁时间
+router.post("/admin/ban",new Auth(16).m,async ctx =>{
+  await User.update({ban_time:ctx.request.body.ban_time},{
+    where:{
+      id:ctx.request.body.uid
+    }
+  })
+  success("封禁成功",`封禁至${ctx.request.body.ban_time}`)
+})
+
 module.exports = router

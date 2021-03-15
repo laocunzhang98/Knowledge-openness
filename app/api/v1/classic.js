@@ -284,7 +284,7 @@ router.delete("/del", new Auth().m, async ctx => {
   success("删除成功!","删除成功!")
 })
 // 后台接口
-router.get("/admin",new Auth(32).m,async ctx =>{
+router.get("/admin",new Auth(16).m,async ctx =>{
   let pageSize = 10
   let page = 0
   const articles = await Article.findAndCountAll({
@@ -302,15 +302,17 @@ router.get("/admin",new Auth(32).m,async ctx =>{
     })
     article.dataValues.nickname = user.nickname
   }
+ 
   success(articles)
 })
 // 管理员删除文章
-router.delete("/admindel",new Auth(32).m, async ctx=>{
+router.delete("/admindel",new Auth(16).m, async ctx=>{
   await Article.destroy({
     where:{
-
-    }
+      id:ctx.request.body.id
+    } 
   })
+  success("删除成功!","删除成功!")
 })
 // 管理员获取分类文章
 router.get("/classify", new Auth().m, async ctx=>{
@@ -324,4 +326,5 @@ router.get("/classify", new Auth().m, async ctx=>{
 
   success(classify_art)
 })
+
 module.exports = router

@@ -1,4 +1,5 @@
 const { Notice, NoticeInfo } = require("../../models/notice")
+const {SysApplyInfo} = require("../../models/apply")
 const Router = require('koa-router')
 const { Auth } = require('../../../middlewares/auth')
 const { success } = require('../../lib/helper')
@@ -63,7 +64,7 @@ router.post("/readinfo", new Auth().m, async ctx => {
 // 读取消息 下次免推送
 router.post("/readapply", new Auth().m, async ctx => {
   let ids = ctx.request.body.aids
-  ApplyInfo.update({ consult: 1 }, {
+  await ApplyInfo.update({ consult: 1 }, {
     where: {
       id: {
         [Op.in]: ids
@@ -71,6 +72,45 @@ router.post("/readapply", new Auth().m, async ctx => {
     }
   })
   success()
+})
+
+//读取系统消息 下次免推送
+router.post("/readsysapply", new Auth().m, async ctx => {
+  let ids = ctx.request.body.ids
+  let infos = await SysApplyInfo.update({ consult: 1 }, {
+    where: {
+      id: {
+        [Op.in]: ids
+      }
+    }
+  })
+  
+  success()
+})
+//获取系统消息
+router.get("/sysinfo", new Auth().m, async ctx => {
+  const sysInfo = await SysApplyInfo.findAll({
+    where: {
+      receiver: ctx.auth.uid
+    },
+    order: [
+      ["createdAt", "DESC"]
+    ]
+  })
+  for (let info of sysInfo){
+    console.log(info)
+    let article = await Article.findOne({
+      paranoid:false,
+      where:{
+        id:info.target_id,
+        deletedAt:{
+          [Op.ne]:null
+        }
+      }
+    })
+    info.dataValues.article = article
+  }
+  success(sysInfo)
 })
 // 获取申请消息
 router.get("/applyinfo", new Auth().m, async ctx => {
