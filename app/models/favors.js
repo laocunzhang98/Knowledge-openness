@@ -1,6 +1,7 @@
 const  {db} = require("../../core/db")
 const {Model,Sequelize} = require('sequelize')
 const {Article}  = require('./article')
+const {Log} = require("./log")
 class Favor extends Model{
   static async like(article_id,uid){
     const favor = await Favor.findOne({
@@ -27,6 +28,13 @@ class Favor extends Model{
       })
       await article.increment('fav_nums',{
         by:1,transaction:t
+      })
+      await Log.create({
+        uid:uid,
+        target_id:article_id,
+        type:"点赞",
+        info:"喜欢文章",
+        team_id: 0
       })
     })
   }

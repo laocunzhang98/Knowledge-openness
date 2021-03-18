@@ -15,7 +15,7 @@ Log.init({
     type:Sequelize.STRING
   },
   info:{
-    type:Sequelize.STRING
+    type:DataTypes.TEXT
   },
   team_id:{
     type:Sequelize.INTEGER

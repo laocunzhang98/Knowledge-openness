@@ -281,6 +281,13 @@ router.delete("/del", new Auth().m, async ctx => {
       throw new Error("参数错误")
     }
   }
+  await Log.create({
+    uid:ctx.auth.uid,
+    target_id:ctx.request.body.article_id,
+    type:"删除",
+    info:"删除文章",
+    team_id: organize_id
+  })
   success("删除成功!","删除成功!")
 })
 // 后台接口

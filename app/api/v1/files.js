@@ -3,8 +3,9 @@ const { Auth,OrgAuth } = require('../../../middlewares/auth')
 const {Files} = require("../../models/files")
 const send = require("koa-send")
 const { success } = require('../../lib/helper')
-const {Op} = require("sequelize")
+const { Op } = require("sequelize")
 const { db } = require("../../../core/db")
+const { Log } = require("../../models/log")
 const router = new Router({
   prefix:"/v1/download"
 })
@@ -29,7 +30,7 @@ router.get("/filelist", new Auth().m, async ctx =>{
   let newfileList = []
   for(let file of fileList){
     // 图片展示为自己本身
-    if(file.mimetype==="png"||file.mimetype==="jpeg"){
+    if(file.mimetype==="png"||file.mimetype==="jpeg"||file.mimetype === "gif"){
       file.dataValues.path = `${global.config.Basepath}/files/${file.origin_path}/${file.filename}`
     }
     newfileList.push(file)
@@ -135,9 +136,19 @@ router.delete("/delfile",new Auth().m,new OrgAuth().n, async ctx=>{
       }
     })
   }
+  for(let id of ctx.request.body.ids){
+    await Log.create({
+      uid:ctx.auth.uid,
+      target_id:id,
+      type:"删除",
+      info:"删除文件",
+      team_id: ctx.organize_id || 0
+    })
+  }
+  
   success(files,"删除成功！")
 })
-
+// 获取可移动文件的目录
 router.get("/allcate",new Auth().m,new OrgAuth().n, async ctx=>{
 
   console.log(ctx.query)
@@ -181,8 +192,7 @@ router.get("/allcate",new Auth().m,new OrgAuth().n, async ctx=>{
   }
   success(files)
 })
-
-
+// 移动文件
 router.post("/movefile", new Auth().m, async ctx=>{
   let ids = ctx.request.body.moveId
   let currentId = ctx.request.body.currentId
@@ -195,7 +205,7 @@ router.post("/movefile", new Auth().m, async ctx=>{
   })
   success("移动成功","移动成功")
 })
-
+// 获取文件类型
 router.get("/mimetype", new Auth().m, async ctx=>{
   let mimetypes = await Files.findAll({
     where:{
@@ -209,7 +219,7 @@ router.get("/mimetype", new Auth().m, async ctx=>{
   })
   success(mimetypes)
 })
-
+// 获取文件总数
 router.get("/filetotal",new Auth().m, async ctx=>{
   let filecount = await Files.count({
     where:{

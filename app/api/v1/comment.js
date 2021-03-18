@@ -21,6 +21,13 @@ router.post("/", new Auth().m, async ctx=>{
   }
   let content = v.get("body.content")
   const comment = await Comment.comment(article_id,article_uid,ctx.auth.uid,oid,content,comment_id)
+  await Log.create({
+    uid:ctx.auth.uid,
+    target_id:ctx.request.body.article_id,
+    type:"评论",
+    info:content,
+    team_id: organize_id
+  })
   success(comment,"评论成功")
 })
 

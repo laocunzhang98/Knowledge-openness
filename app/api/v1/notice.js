@@ -98,7 +98,6 @@ router.get("/sysinfo", new Auth().m, async ctx => {
     ]
   })
   for (let info of sysInfo){
-    console.log(info)
     let article = await Article.findOne({
       paranoid:false,
       where:{
