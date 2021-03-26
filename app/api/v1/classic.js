@@ -241,7 +241,6 @@ router.get("/orglatest", new Auth().m, async ctx => {
     data.name = user.nickname
     result.push(data)
   }
-
   success({
     data: result,
     countSize: r.count
@@ -290,6 +289,17 @@ router.delete("/del", new Auth().m, async ctx => {
   })
   success("删除成功!","删除成功!")
 })
+
+router.get("/count",new Auth().m,async ctx=>{
+  let organize_id = parseInt(ctx.query.organize_id)
+  let count = await Article.count({
+    where: {
+      organize_id: organize_id
+    },
+  })
+  success(count)
+})
+
 // 后台接口
 router.get("/admin",new Auth(16).m,async ctx =>{
   let pageSize = 10

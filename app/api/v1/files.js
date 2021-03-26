@@ -9,8 +9,10 @@ const { Log } = require("../../models/log")
 const router = new Router({
   prefix:"/v1/download"
 })
-// 获取圈子文件
+// 获取当前时间
 
+
+// 获取圈子文件
 
 // 获取文件列表
 router.get("/filelist", new Auth().m, async ctx =>{
@@ -145,13 +147,10 @@ router.delete("/delfile",new Auth().m,new OrgAuth().n, async ctx=>{
       team_id: ctx.organize_id || 0
     })
   }
-  
   success(files,"删除成功！")
 })
 // 获取可移动文件的目录
 router.get("/allcate",new Auth().m,new OrgAuth().n, async ctx=>{
-
-  console.log(ctx.query)
   let ids = JSON.parse(ctx.query.ids)|| []
   let params = {
     mimetype:"dir",
@@ -230,6 +229,27 @@ router.get("/filetotal",new Auth().m, async ctx=>{
     }
   })
   success(filecount)
+})
+//获取当天文件数量
+router.get("/dayfile",new Auth(16).m,async ctx=>{
+  // const dayfile = await Files.findAndCountAll({
+  //   where:{
+  //     mimetype:{
+  //       [Op.ne]:"dir"
+  //     },
+  //     createdAt:"2020-03-05"
+  //   }
+  // })
+  let data = []
+  for(let i = 0; i < 2 ; i++){
+    let sql = `SELECT * FROM logs WHERE DATEDIFF(NOW(),createdAt)= ${i}`
+    let day = await db.query(sql)
+    data.unshift(day[0])
+  }
+  // let time = '2021-03-05'
+  // let sql = `SELECT * FROM logs WHERE DATEDIFF('${time}',createdAt)= 0`
+  // const dayfile = await db.query(sql)
+  success(data)
 })
 
 module.exports = router

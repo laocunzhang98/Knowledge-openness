@@ -7,6 +7,7 @@ const {Organize , Orgmember} = require("../../models/Organize")
 const {Op} = require("sequelize")
 const {db} = require("../../../core/db")
 const {ApplyInfo} = require("../../models/apply")
+const { Log } = require("../../models/log")
 const router = new Router({
   prefix:"/v1/organize"
 })
@@ -130,7 +131,13 @@ router.post("/join",new Auth().m,async ctx=>{
     await org.increment("total",{by:1,transaction:t})
     await ApplyInfo.handleApply("同意",uid,team_id)
   })
-  
+  await Log.create({
+    uid:uid,
+    target_id:team_id,
+    type:"加入",
+    info:"加入组织",
+    team_id: team_id
+  })
   success(`加入圈子成功！`,'同意加入圈子')
 })
 // 获取自己在组织中的权限
@@ -246,6 +253,18 @@ router.post("/modifylevel", new Auth().m,new OrgAuth().n, async ctx=>{
       team_id:team_id
     }
   })
+  let levelist = {
+    "1":"只读成员",
+    "8":"成员",
+    "16":"管理员"
+  }
+  await Log.create({
+    uid:ctx.auth.uid,
+    target_id:uid,
+    type:"设置",
+    info:`设置为${levelist[level]}`,
+    team_id: team_id
+  })
   success("设置成功！","设置成功")
 })
 // 成员移除
@@ -275,6 +294,13 @@ router.delete("/remove", new Auth().m, new OrgAuth().n,async ctx =>{
       sponsor:member_id,
       target_id:team_id
     }
+  })
+  await Log.create({
+    uid:ctx.auth.uid,
+    target_id:member_id,
+    type:"移除",
+    info:`移除团队`,
+    team_id: team_id
   })
   success("移除成功","移除成功")
 })
