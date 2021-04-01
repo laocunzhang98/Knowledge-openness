@@ -215,7 +215,9 @@ router.get("/teamid",new Auth().m, async ctx=>{
 router.get("/orglist",new Auth().m, async ctx =>{
   const orglist = await Organize.findAll({
     where:{
-    }
+      open:1
+    },
+    order:[["createdAt","DESC"]]
   })
   success(orglist)
 })
@@ -347,5 +349,19 @@ router.get("/manager",new Auth().m, async ctx=>{
   })
   success(manager)
 })
+
+// 30日团队成立数
+router.get("/statistics",new Auth(16).m,async ctx=>{
+
+})
+// 获取组织类型分类数
+router.get("/classify",new Auth(16).m,async ctx=>{
+  let static = await Organize.findAll({
+    group:"type",
+    attributes: [[db.fn('COUNT', db.col('*')), 'value'],['type',"name"]],
+  })
+  success(static)
+})
+
 module.exports = router
 

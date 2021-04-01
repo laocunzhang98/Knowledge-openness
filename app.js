@@ -14,10 +14,20 @@ const io = require('socket.io')(server, {
 })
 
 app.use(async (ctx, next) => {
+  
   ctx.set("Access-Control-Allow-Origin", "*")
   ctx.set("Access-Control-Allow-Methods", "*");
   ctx.set("X-Powered-By", ' 3.2.1');
   ctx.set("Access-Control-Allow-Headers", "Content-Type,Access-Token")
+  // ctx.set("Cache-Control","max-age=3600")
+  ctx.set("Cache-Control","no-cache")
+  ctx.set("Last-Modified","123")
+  // if(ctx.headers["if-modified-since"]=="123"){
+    // ctx.body = {
+    //   code:404
+    // }
+    // ctx.status = 304
+  // }
   await next()
 })
 

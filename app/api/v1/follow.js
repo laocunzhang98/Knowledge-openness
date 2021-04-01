@@ -14,7 +14,6 @@ const router = new Router({
 router.post("/",new Auth().m, async ctx=>{
   const v = await new FollowValidator().validate(ctx)
   await Follow.follow(ctx.auth.uid,v.get("body.fid"))
-  
   success("操作成功","操作成功")
 })
 // 判断是否关注
@@ -25,7 +24,6 @@ router.get("/isfollow", new Auth().m, async (ctx)=>{
       fid:ctx.query.fid
     }
   })
- 
   if(isFollow){
     success("1",)
   }
@@ -60,12 +58,7 @@ router.get("/user",new Auth().m,async ctx=>{
       "follow_nums"
     ]
   })
-  await Log.create({
-    uid:ctx.auth.uid,
-    target_id:uid,
-    type:"查看",
-    info:"查看关注列表",
-  })
+  
   success(user)
 })
 

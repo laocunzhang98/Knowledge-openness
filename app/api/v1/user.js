@@ -6,7 +6,8 @@ const { Notice } = require('../../models/notice')
 const { RegisterValidator, EmailValidator } = require('../../lib/validators/validator')
 const { success } = require('../../lib/helper')
 const { Auth } = require("../../../middlewares/auth")
-const {Op, where} = require("sequelize")
+const {Op} = require("sequelize")
+const {db} = require("../../../core/db")
 const router = new Router({
   prefix: '/v1/user'
 })
@@ -224,6 +225,41 @@ router.post("/admin/ban",new Auth(16).m,async ctx =>{
     }
   })
   success("封禁成功",`封禁至${ctx.request.body.ban_time}`)
+})
+//30日注册数量
+router.get("/statistics",new Auth(16).m, async ctx=>{
+  let days = ctx.query.day
+  let data = []
+  let sql
+  if(days>30){
+    days=30
+  }
+  for (let i =0;i<= days;i++){
+    sql = `SELECT COUNT(*) as count  FROM user WHERE DATEDIFF(NOW(),createdAt) = ${i}`
+    let statistics = await db.query(sql)
+    data.unshift(statistics[0][0])
+  }
+  success(data)
+})
+// 获取当日在线人数
+router.get("/dayonline",new Auth(16).m,async ctx=>{
+  let sql = ` SELECT COUNT(*) as count  FROM notice WHERE DATEDIFF(NOW(),updatedAt) = 0`
+  let onlineNum = await db.query(sql)
+  success(onlineNum[0][0])
+})
+// 获取用户总数
+router.get("/all",new Auth(16).m,async ctx=>{
+  const count = await User.count({})
+  success(count)
+})
+// 获取当前在线人数
+router.get("/online",new Auth(16).m,async ctx=>{
+  const online = await Notice.count({
+    where:{
+      online:1
+    }
+  })
+  success(online)
 })
 
 module.exports = router

@@ -8,6 +8,9 @@ Log.init({
   uid:{
     type:Sequelize.INTEGER
   },
+  category:{
+    type:Sequelize.INTEGER
+  },
   type:{
     type:Sequelize.STRING
   },

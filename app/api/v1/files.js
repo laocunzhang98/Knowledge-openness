@@ -144,6 +144,7 @@ router.delete("/delfile",new Auth().m,new OrgAuth().n, async ctx=>{
       target_id:id,
       type:"删除",
       info:"删除文件",
+      category:2,
       team_id: ctx.organize_id || 0
     })
   }
@@ -230,25 +231,20 @@ router.get("/filetotal",new Auth().m, async ctx=>{
   })
   success(filecount)
 })
-//获取当天文件数量
+
+//获取30天内上传文件数量
 router.get("/dayfile",new Auth(16).m,async ctx=>{
-  // const dayfile = await Files.findAndCountAll({
-  //   where:{
-  //     mimetype:{
-  //       [Op.ne]:"dir"
-  //     },
-  //     createdAt:"2020-03-05"
-  //   }
-  // })
+  let days = ctx.query.day
   let data = []
-  for(let i = 0; i < 2 ; i++){
+  let sql
+  if(days>30){
+    days=30
+  }
+  for(let i = 0; i < days ; i++){
     let sql = `SELECT * FROM logs WHERE DATEDIFF(NOW(),createdAt)= ${i}`
     let day = await db.query(sql)
-    data.unshift(day[0])
+    data.unshift(day[0][0])
   }
-  // let time = '2021-03-05'
-  // let sql = `SELECT * FROM logs WHERE DATEDIFF('${time}',createdAt)= 0`
-  // const dayfile = await db.query(sql)
   success(data)
 })
 

@@ -42,6 +42,7 @@ router.post("/addfile",new Auth().m, new OrgAuth().n,async ctx=>{
       url:url,
       size:ctx.req.file.size
     }
+    
     success(data,"文件上传成功")
   } 
   

@@ -52,6 +52,7 @@ router.post("/update", new Auth().m, upload.single('file'), async (ctx, next) =>
     target_id:ctx.request.body.article_id,
     type:"更新",
     info:"更新文章",
+    category:1,
     team_id: ctx.request.body.organize_id
   })
   success({ article_id: ctx.request.body.article_id, title: ctx.request.body.title }, "修改文章成功,快去看看吧！")
@@ -81,6 +82,7 @@ router.post('/pub', new Auth().m, upload.single('file'), async (ctx, next) => {
     uid:ctx.auth.uid,
     target_id:article.id,
     type:"发表",
+    category:1,
     info:"发表文章",
     team_id: ctx.request.body.organize_id
   })
@@ -132,13 +134,6 @@ router.get('/article/:id', new Auth().m, new OrgArticle().k,async (ctx, next) =>
   article.dataValues.describe = user.describe
   await article.increment('read_nums', {
     by: 1
-  })
-  await Log.create({
-    uid:ctx.auth.uid,
-    target_id:article_id,
-    type:"浏览",
-    info:"浏览文章",
-    team_id: ctx.organize_id
   })
   success(article.dataValues)
 })
@@ -285,6 +280,7 @@ router.delete("/del", new Auth().m, async ctx => {
     target_id:ctx.request.body.article_id,
     type:"删除",
     info:"删除文章",
+    category:1,
     team_id: organize_id
   })
   success("删除成功!","删除成功!")
@@ -343,5 +339,19 @@ router.get("/classify", new Auth().m, async ctx=>{
 
   success(classify_art)
 })
-
+// 统计30天内发表文章数量
+router.get("/statistics",new Auth(16).m, async ctx =>{
+  let days = ctx.query.day
+  let data = []
+  let sql
+  if(days>30){
+    days=30
+  }
+  for ( let i =0;i<= days;i++){
+    sql = ` SELECT COUNT(*) as count  FROM article WHERE DATEDIFF(NOW(),createdAt) = ${i}`
+    let statistics = await db.query(sql)
+    data.unshift(statistics[0][0])
+  }
+  success(data)
+})
 module.exports = router

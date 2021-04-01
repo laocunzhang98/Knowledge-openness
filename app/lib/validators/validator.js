@@ -86,7 +86,7 @@ class TokenValidator extends LinValidator{
       new Rule('isOptional'),
       new Rule('isLength','至少6个字符',{
         min:6,
-        max:12
+        max:20
       })
     ]
   }
