@@ -352,7 +352,18 @@ router.get("/manager",new Auth().m, async ctx=>{
 
 // 30日团队成立数
 router.get("/statistics",new Auth(16).m,async ctx=>{
-
+  let days = ctx.query.day
+  let data = []
+  let sql
+  if(days>30){
+    days=30
+  }
+  for(let i = 0; i <= days ; i++){
+    sql = `SELECT COUNT(*) as count  from organize WHERE DATEDIFF(NOW(),createdAt) = ${i}`
+    let day = await db.query(sql)
+    data.unshift(day[0][0])
+  }
+  success(data)
 })
 // 获取组织类型分类数
 router.get("/classify",new Auth(16).m,async ctx=>{

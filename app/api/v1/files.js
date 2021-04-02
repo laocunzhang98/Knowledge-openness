@@ -6,6 +6,7 @@ const { success } = require('../../lib/helper')
 const { Op } = require("sequelize")
 const { db } = require("../../../core/db")
 const { Log } = require("../../models/log")
+const {sqlTemp} = require("../../lib/utils")
 const router = new Router({
   prefix:"/v1/download"
 })
@@ -235,16 +236,10 @@ router.get("/filetotal",new Auth().m, async ctx=>{
 //获取30天内上传文件数量
 router.get("/dayfile",new Auth(16).m,async ctx=>{
   let days = ctx.query.day
-  let data = []
-  let sql
-  if(days>30){
-    days=30
+  function sql(date){
+    return `SELECT COUNT(*) as count  from files WHERE DATEDIFF(NOW(),createdAt)=${date} and mimetype <> 'dir'`
   }
-  for(let i = 0; i < days ; i++){
-    let sql = `SELECT * FROM logs WHERE DATEDIFF(NOW(),createdAt)= ${i}`
-    let day = await db.query(sql)
-    data.unshift(day[0][0])
-  }
+  let data = await sqlTemp(days,sql)
   success(data)
 })
 

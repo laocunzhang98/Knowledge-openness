@@ -254,12 +254,15 @@ router.get("/all",new Auth(16).m,async ctx=>{
 })
 // 获取当前在线人数
 router.get("/online",new Auth(16).m,async ctx=>{
-  const online = await Notice.count({
+  let online = await Notice.count({
     where:{
       online:1
     }
   })
-  success(online)
+  data= {
+    count:online
+  }
+  success(data)
 })
 
 module.exports = router

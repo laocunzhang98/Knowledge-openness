@@ -20,8 +20,8 @@ app.use(async (ctx, next) => {
   ctx.set("X-Powered-By", ' 3.2.1');
   ctx.set("Access-Control-Allow-Headers", "Content-Type,Access-Token")
   // ctx.set("Cache-Control","max-age=3600")
-  ctx.set("Cache-Control","no-cache")
-  ctx.set("Last-Modified","123")
+  // ctx.set("Cache-Control","no-cache")
+  // ctx.set("Last-Modified","123")
   // if(ctx.headers["if-modified-since"]=="123"){
     // ctx.body = {
     //   code:404

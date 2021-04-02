@@ -67,4 +67,8 @@ router.post("/destination", new Auth().m, new OrgAuth().n, async ctx=>{
   })
   success(files)
 })
+
+
+
+
 module.exports = router
