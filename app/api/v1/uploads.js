@@ -69,6 +69,8 @@ router.post("/destination", new Auth().m, new OrgAuth().n, async ctx=>{
 })
 
 
-
+router.post("/filechucks",new Auth().m,async ctx=>{
+  
+})
 
 module.exports = router
