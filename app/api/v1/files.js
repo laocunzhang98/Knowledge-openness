@@ -105,6 +105,7 @@ router.get("/catefile",new Auth().m,async ctx=>{
 } )
 // 删除文件
 router.delete("/delfile",new Auth().m,new OrgAuth().n, async ctx=>{
+  console.log(ctx.request.body);
   let files = await Files.findAll({
     where:{
       id:{
