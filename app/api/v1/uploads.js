@@ -8,6 +8,7 @@ const file = require("../../routes/files")
 const chunkfile = require("../../routes/chunkfile")
 const { Files } = require("../../models/files")
 const { FolderValidator } = require("../../lib/validators/validator")
+const { Log } = require("../../models/log")
 const router = new Router({
   prefix: '/v1/uploads'
 })
@@ -28,7 +29,6 @@ router.post('/addpic', new Auth().m, upload.single('file'), async (ctx, next) =>
 
 // 上传文件
 router.post("/addfile", new Auth().m, new OrgAuth().n, async ctx => {
- 
   let err = await file.single("file")(ctx)
     .then(res => res)
     .catch(err => err)
@@ -37,14 +37,22 @@ router.post("/addfile", new Auth().m, new OrgAuth().n, async ctx => {
     throw new global.errs.FileError()
   }
   else {
-    console.log(ctx.req.file);
     let url = global.config.Basepath + `/files/${temp.year}${temp.month}${temp.day}/${ctx.req.file.filename}`
     let data = {
-      filename: ctx.req.filefilename,
+      filename: ctx.req.file.filename,
       origin_path: path.resolve(ctx.req.file.destination).split("\\").pop(),
       url: url,
       size: ctx.req.file.size
     }
+    console.log(ctx.req.file.filename)
+    // await Log.create({
+    //   uid:ctx.auth.uid,
+    //   target_id:id,
+    //   type:"上传",
+    //   info:"上传文件",
+    //   category:2,
+    //   team_id: ctx.organize_id || 0
+    // })
     success(data, "文件上传成功")
   }
 
@@ -67,10 +75,19 @@ router.post("/destination", new Auth().m, new OrgAuth().n, async ctx => {
     organize_id: ctx.request.body.organize_id || 0,
     size: v.get("body.size") || 0
   })
+  // if(files)
+  // await Log.create({
+  //   uid:ctx.auth.uid,
+  //   target_id:id,
+  //   type:"新建",
+  //   info:"新建文件夹",
+  //   category:2,
+  //   team_id: ctx.organize_id || 0
+  // })
   success(files)
 })
 
-
+// 文件分片
 router.post("/filechucks", new Auth().m, async ctx => {
 
   let err = await chunkfile.single("chunk")(ctx)

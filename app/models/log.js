@@ -8,6 +8,8 @@ Log.init({
   uid:{
     type:Sequelize.INTEGER
   },
+  // 1是文章
+  // 2是文件
   category:{
     type:Sequelize.INTEGER
   },

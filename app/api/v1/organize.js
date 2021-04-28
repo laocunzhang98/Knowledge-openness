@@ -135,7 +135,7 @@ router.post("/join",new Auth().m,async ctx=>{
     uid:uid,
     target_id:team_id,
     type:"加入",
-    info:"加入组织",
+    info:"成功加入当前团队",
     team_id: team_id
   })
   success(`加入圈子成功！`,'同意加入圈子')
@@ -327,7 +327,25 @@ router.post("/dissolution", new Auth().m,async ctx =>{
   // 删除组织成员
   success("解散成功!","解散成功!")
 })
+//获取团队详细信息
+router.get("/introduce",new Auth().m,async ctx=>{
+  let team_id = ctx.query.organize_id
+  const OrgInfo = await Organize.findOne({
+    where:{
+      team_id:team_id
+    }
+  })
+  const user = await User.findOne({
+    where:{
+      id:OrgInfo.dataValues.uid
+    },
+    attributes:["nickname"]
+  })
+  OrgInfo.dataValues.nickname = user.nickname
+  success(OrgInfo)
+})
 
+// 团队开放
 router.post("/open",new Auth().m,new OrgAuth().n, async ctx=>{
   let open = ctx.request.body.open
   await Organize.update({

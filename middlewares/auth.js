@@ -72,7 +72,7 @@ class OrgAuth{
       if(parseInt(ctx.query.organize_id)){
         ctx.organize_id = ctx.query.organize_id
       }
-      else if(ctx.request.body.organize_id){
+      if(ctx.request.body.organize_id){
         ctx.organize_id = ctx.request.body.organize_id
       }
       else{

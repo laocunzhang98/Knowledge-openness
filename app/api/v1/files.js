@@ -234,11 +234,31 @@ router.get("/filetotal",new Auth().m, async ctx=>{
   success(filecount)
 })
 
+// 获取团队7日内上传文件数
+router.get("/orglately",new Auth().m,async ctx =>{
+  let organize_id = parseInt(ctx.query.organize_id)
+  let days = ctx.query.day
+  let data = []
+  if(days>30){
+    days=30
+  }
+  for (let i =0;i<7;i++){
+    sql = `SELECT COUNT(*) as count FROM files WHERE DATEDIFF(NOW(),createdAt) = ${i} and organize_id = ${organize_id} and mimetype <> 'dir'`
+    let statistics = await db.query(sql)
+    var day1 = new Date();
+    day1.setTime(day1.getTime()-24*60*60*1000*i);
+    var s1 = day1.getFullYear()+"-" + (day1.getMonth()+1) + "-" + day1.getDate();
+    statistics[0][0].date = s1
+    data.unshift(statistics[0][0])
+  }
+  success(data)
+})
+
 //获取30天内上传文件数量
 router.get("/dayfile",new Auth(16).m,async ctx=>{
   let days = ctx.query.day
   function sql(date){
-    return `SELECT COUNT(*) as count  from files WHERE DATEDIFF(NOW(),createdAt)=${date} and mimetype <> 'dir'`
+    return `SELECT COUNT(*) as count from files WHERE DATEDIFF(NOW(),createdAt)=${date} and mimetype <> 'dir'`
   }
   let data = await sqlTemp(days,sql)
   success(data)

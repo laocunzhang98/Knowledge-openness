@@ -1,6 +1,6 @@
 const Router = require("koa-router")
 const { Auth,OrgAuth,OrgArticle} = require('../../../middlewares/auth')
-const { Op, Sequelize } = require("sequelize")
+const { Op, Sequelize, DATE } = require("sequelize")
 const { success } = require("../../lib/helper")
 const { Article } = require("../../models/article")
 const upload = require('../../routes/upload')
@@ -286,6 +286,26 @@ router.delete("/del", new Auth().m, async ctx => {
   success("删除成功!","删除成功!")
 })
 
+//计算团队近七日上传文章数
+router.get("/orglately",new Auth().m, async ctx=>{
+  let organize_id = parseInt(ctx.query.organize_id)
+  let days = ctx.query.day
+  let data = []
+  if(days>30){
+    days=30
+  }
+  for (let i =0;i<7;i++){
+    sql = ` SELECT COUNT(*) as count FROM article WHERE DATEDIFF(NOW(),createdAt) = ${i} and organize_id = ${organize_id}`
+    let statistics = await db.query(sql)
+    var day1 = new Date();
+    day1.setTime(day1.getTime()-24*60*60*1000*i);
+    var s1 = day1.getFullYear()+"-" + (day1.getMonth()+1) + "-" + day1.getDate();
+    statistics[0][0].date = s1
+    data.unshift(statistics[0][0])
+  }
+  success(data)
+})
+// 计算团队文章数
 router.get("/count",new Auth().m,async ctx=>{
   let organize_id = parseInt(ctx.query.organize_id)
   let count = await Article.count({
