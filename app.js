@@ -45,6 +45,6 @@ app.use(catchError)
 app.use(parser({multipart:true}))
 InitManager.initCore(app)
 
-
+// console.log(global.config.Basepath);
 server.listen(3000,"10.1.10.75")
 

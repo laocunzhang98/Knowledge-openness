@@ -213,10 +213,19 @@ router.get("/teamid",new Auth().m, async ctx=>{
 })
 // 获取圈子列表
 router.get("/orglist",new Auth().m, async ctx =>{
+  let type = ctx.query.type
+  let team_id = ctx.query.team_id
+  let condition = {open:1}
+  if(team_id){
+    condition.team_id = team_id
+  }
+  if(type){
+    if(!team_id){
+      condition.type = type
+    }
+  }
   const orglist = await Organize.findAll({
-    where:{
-      open:1
-    },
+    where:condition,
     order:[["createdAt","DESC"]]
   })
   success(orglist)

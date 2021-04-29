@@ -103,7 +103,6 @@ class OrgAuth{
 
 class OrgArticle{
   get k(){
-    
     return async (ctx, next)=>{
       if(ctx.auth.scope==32){
         await next()
@@ -126,7 +125,7 @@ class OrgArticle{
       if(!member){
         throw new global.errs.NotFound()
       }
-      console.log(article.organize_id)
+      // console.log(article.organize_id)
       ctx.organize_id = member.team_id
       await next()
     }
